@@ -1,68 +1,134 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Support Ticket</title>
-<style>
-body{
-font-family:Arial;
-max-width:600px;
-margin:50px auto;
-}
-input,textarea,select,button{
-width:100%;
-padding:10px;
-margin:10px 0;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support Ticket Portal</title>
+  <style>
+    body{font-family:Arial; background:#f7f7fb; margin:0; padding:0;}
+    .wrap{max-width:720px; margin:40px auto; padding:20px;}
+    .card{background:#fff; border-radius:14px; padding:22px; box-shadow:0 8px 24px rgba(0,0,0,.08);}
+    h1{margin:0 0 6px;}
+    p{margin:0 0 18px; color:#555;}
+    label{display:block; font-size:13px; margin:12px 0 6px; color:#333;}
+    input, textarea, select{
+      width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;
+      font-size:14px; outline:none;
+    }
+    textarea{min-height:120px; resize:vertical;}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+    .btn{
+      margin-top:16px; background:#6c2bd9; color:#fff; border:0; padding:12px 16px;
+      border-radius:10px; font-size:15px; cursor:pointer; width:100%;
+    }
+    .btn:disabled{opacity:.6; cursor:not-allowed;}
+    .pill{display:inline-block; font-size:12px; padding:6px 10px; border-radius:999px; background:#efe8ff; color:#5b22c9; margin-bottom:14px;}
+    .msg{margin-top:14px; font-size:14px;}
+    .ok{color:#0a8f3a;}
+    .err{color:#c62828;}
+    .foot{margin-top:10px; font-size:12px; color:#888;}
+  </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <div class="card">
+      <div class="pill">Customer Support Tickets</div>
+      <h1>Submit a Ticket</h1>
+      <p>Fill the form below — we’ll get back to you as soon as possible.</p>
 
-<h2>Submit Support Ticket</h2>
+      <div class="row">
+        <div>
+          <label>Your Name</label>
+          <input id="name" placeholder="e.g. Ali Huzain" />
+        </div>
+        <div>
+          <label>Your Email</label>
+          <input id="email" placeholder="e.g. ali@email.com" />
+        </div>
+      </div>
 
-<input id="name" placeholder="Your name">
-<input id="email" placeholder="Your email">
+      <label>Subject</label>
+      <input id="subject" placeholder="Short summary" />
 
-<input id="subject" placeholder="Subject">
+      <label>Message</label>
+      <textarea id="message" placeholder="Describe your issue..."></textarea>
 
-<textarea id="message" placeholder="Message"></textarea>
+      <label>Category</label>
+      <select id="category">
+        <option>Billing</option>
+        <option>Technical Issue</option>
+        <option>Feature Request</option>
+        <option>Complaint</option>
+        <option>General Inquiry</option>
+      </select>
 
-<select id="category">
-<option>Billing</option>
-<option>Technical Issue</option>
-<option>Complaint</option>
-<option>General Inquiry</option>
-</select>
-
-<button onclick="sendTicket()">Submit</button>
+      <button class="btn" id="btn" onclick="sendTicket()">Send Ticket</button>
+      <div class="msg" id="msg"></div>
+      <div class="foot">Tip: this sends directly to Activepieces Webhook.</div>
+    </div>
+  </div>
 
 <script>
+  const WEBHOOK_URL = "https://cloud.activepieces.com/api/v1/webhooks/UnLMXk61h1UlcIWNTo5VT";
 
-const webhook = "https://cloud.activepieces.com/api/v1/webhooks/UnLMXk61h1UlcIWNTo5VT";
+  function isEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 
-async function sendTicket(){
+  async function sendTicket(){
+    const btn = document.getElementById("btn");
+    const msg = document.getElementById("msg");
+    msg.textContent = "";
+    msg.className = "msg";
 
-const data = {
-name: document.getElementById("name").value,
-email: document.getElementById("email").value,
-subject: document.getElementById("subject").value,
-message: document.getElementById("message").value,
-category: document.getElementById("category").value
-};
+    const data = {
+      name: document.getElementById("name").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      subject: document.getElementById("subject").value.trim(),
+      message: document.getElementById("message").value.trim(),
+      category: document.getElementById("category").value
+    };
 
-await fetch(webhook,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify(data)
-});
+    if(!data.name || !data.email || !data.subject || !data.message){
+      msg.textContent = "Please fill all fields.";
+      msg.classList.add("err");
+      return;
+    }
+    if(!isEmail(data.email)){
+      msg.textContent = "Please enter a valid email.";
+      msg.classList.add("err");
+      return;
+    }
+    if(WEBHOOK_URL.includes("https://cloud.activepieces.com/api/v1/webhooks/UnLMXk61h1UlcIWNTo5VT")){
+      msg.textContent = "Webhook URL not set yet.";
+      msg.classList.add("err");
+      return;
+    }
 
-alert("Ticket Sent");
+    try{
+      btn.disabled = true;
+      btn.textContent = "Sending...";
 
-}
+      const res = await fetch(WEBHOOK_URL, {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify(data)
+      });
 
+      if(!res.ok) throw new Error("Request failed");
+
+      msg.textContent = "✅ Ticket sent successfully!";
+      msg.classList.add("ok");
+
+      document.getElementById("subject").value = "";
+      document.getElementById("message").value = "";
+      document.getElementById("category").value = "Billing";
+    }catch(e){
+      msg.textContent = "❌ Failed to send. Try again.";
+      msg.classList.add("err");
+    }finally{
+      btn.disabled = false;
+      btn.textContent = "Send Ticket";
+    }
+  }
 </script>
-
 </body>
 </html>
