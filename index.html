@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Support Ticket</title>
+<style>
+body{
+font-family:Arial;
+max-width:600px;
+margin:50px auto;
+}
+input,textarea,select,button{
+width:100%;
+padding:10px;
+margin:10px 0;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Submit Support Ticket</h2>
+
+<input id="name" placeholder="Your name">
+<input id="email" placeholder="Your email">
+
+<input id="subject" placeholder="Subject">
+
+<textarea id="message" placeholder="Message"></textarea>
+
+<select id="category">
+<option>Billing</option>
+<option>Technical Issue</option>
+<option>Complaint</option>
+<option>General Inquiry</option>
+</select>
+
+<button onclick="sendTicket()">Submit</button>
+
+<script>
+
+const webhook = "https://cloud.activepieces.com/api/v1/webhooks/UnLMXk61h1UlcIWNTo5VT";
+
+async function sendTicket(){
+
+const data = {
+name: document.getElementById("name").value,
+email: document.getElementById("email").value,
+subject: document.getElementById("subject").value,
+message: document.getElementById("message").value,
+category: document.getElementById("category").value
+};
+
+await fetch(webhook,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(data)
+});
+
+alert("Ticket Sent");
+
+}
+
+</script>
+
+</body>
+</html>
