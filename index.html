@@ -3,552 +3,620 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Support Ticket Portal</title>
+  <title>Support Desk — Activepieces Ticket Portal</title>
 
-  <!-- Google Font -->
+  <!-- Fonts (subtle + professional) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg0:#070814;
-      --bg1:#0b0d22;
+      --bg: #0b1220;
       --card: rgba(255,255,255,.06);
       --card2: rgba(255,255,255,.08);
-      --stroke: rgba(255,255,255,.12);
-      --text:#eaeaf2;
-      --muted: rgba(234,234,242,.72);
+      --line: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.68);
+      --muted2: rgba(255,255,255,.55);
 
-      --a:#7c3aed;   /* purple */
-      --b:#06b6d4;   /* cyan */
-      --c:#f97316;   /* orange */
-      --good:#22c55e;
-      --bad:#ef4444;
+      /* “Human” palette: deep navy + teal accent + soft violet */
+      --accent: #2dd4bf;      /* teal */
+      --accent2: #60a5fa;     /* blue */
+      --accent3: #a78bfa;     /* violet */
+      --danger: #ef4444;
+      --ok: #22c55e;
 
-      --shadow: 0 24px 80px rgba(0,0,0,.55);
-      --shadow2: 0 18px 60px rgba(124,58,237,.20);
-      --r: 18px;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius: 18px;
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
+    *{ box-sizing: border-box; }
+    html,body{ height:100%; }
     body{
       margin:0;
-      font-family:"Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      color:var(--text);
-      background: radial-gradient(1200px 700px at 18% 15%, rgba(124,58,237,.35), transparent 55%),
-                  radial-gradient(1100px 680px at 85% 22%, rgba(6,182,212,.28), transparent 55%),
-                  radial-gradient(900px 600px at 60% 90%, rgba(249,115,22,.16), transparent 60%),
-                  linear-gradient(180deg, var(--bg0), var(--bg1));
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 15% 10%, rgba(167,139,250,.22), transparent 60%),
+                  radial-gradient(900px 700px at 85% 25%, rgba(45,212,191,.18), transparent 60%),
+                  radial-gradient(1000px 900px at 60% 110%, rgba(96,165,250,.16), transparent 60%),
+                  var(--bg);
       overflow-x:hidden;
     }
 
-    /* animated blobs */
-    .blob{
-      position:absolute; inset:auto;
-      width:520px; height:520px;
-      filter: blur(38px);
-      opacity:.55;
-      border-radius: 40% 60% 55% 45% / 55% 45% 55% 45%;
-      animation: float 10s ease-in-out infinite;
+    /* Subtle noise overlay (not AI-ish) */
+    .noise{
       pointer-events:none;
-      mix-blend-mode: screen;
-    }
-    .blob.one{ left:-120px; top:-120px; background: radial-gradient(circle at 30% 30%, rgba(124,58,237,.95), rgba(124,58,237,0) 60%); }
-    .blob.two{ right:-160px; top:-90px; background: radial-gradient(circle at 35% 40%, rgba(6,182,212,.9), rgba(6,182,212,0) 62%); animation-duration: 12s; }
-    .blob.three{ left:40%; bottom:-220px; transform:translateX(-50%); background: radial-gradient(circle at 40% 35%, rgba(249,115,22,.65), rgba(249,115,22,0) 64%); animation-duration: 14s; }
-
-    @keyframes float{
-      0%,100%{ transform: translate(0,0) rotate(0deg); }
-      50%{ transform: translate(18px, -18px) rotate(8deg); }
+      position:fixed; inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.15'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+      opacity:.22;
     }
 
-    /* layout */
-    .wrap{
-      position:relative;
-      max-width:1100px;
-      margin:0 auto;
-      padding: 44px 20px 90px;
-    }
+    a{ color: inherit; text-decoration:none; }
+    .container{ max-width:1100px; margin:0 auto; padding:24px; }
 
-    /* top bar */
+    /* Top nav */
     .topbar{
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(16px);
+      background: linear-gradient(to bottom, rgba(11,18,32,.86), rgba(11,18,32,.55));
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .topbar-inner{
       display:flex; align-items:center; justify-content:space-between;
-      gap:14px;
-      padding: 12px 14px;
-      border:1px solid var(--stroke);
-      border-radius: 999px;
-      background: rgba(255,255,255,.04);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 8px 30px rgba(0,0,0,.25);
+      gap:16px; padding:16px 24px;
+      max-width:1100px; margin:0 auto;
     }
     .brand{
-      display:flex; align-items:center; gap:10px;
-      font-weight:800;
-      letter-spacing:.2px;
+      display:flex; align-items:center; gap:12px;
+      min-width: 220px;
     }
     .logo{
-      width:38px; height:38px; border-radius: 12px;
-      background: linear-gradient(135deg, rgba(124,58,237,1), rgba(6,182,212,1));
-      box-shadow: 0 12px 30px rgba(124,58,237,.25);
-      position:relative;
+      width:38px; height:38px; border-radius:12px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(45,212,191,.9), transparent 55%),
+        radial-gradient(circle at 70% 70%, rgba(167,139,250,.85), transparent 55%),
+        rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
-    .logo:after{
-      content:"";
-      position:absolute; inset:9px;
-      border-radius: 10px;
-      background: rgba(255,255,255,.16);
-      border:1px solid rgba(255,255,255,.18);
+    .brand h1{
+      font-size: 14px; margin:0; font-weight:700; letter-spacing:.2px;
     }
-    .pill{
-      font-size:12px;
-      color:rgba(255,255,255,.82);
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.12);
-      padding:6px 10px;
-      border-radius:999px;
-      white-space:nowrap;
+    .brand p{
+      margin:2px 0 0; font-size:12px; color:var(--muted2);
     }
 
-    /* hero */
-    .hero{
-      margin-top:26px;
-      display:grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap:22px;
-      align-items:stretch;
-    }
-
-    .heroCard{
-      border:1px solid var(--stroke);
-      border-radius: calc(var(--r) + 6px);
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
-      backdrop-filter: blur(14px);
-      box-shadow: var(--shadow);
-      padding: 26px;
-      overflow:hidden;
-      position:relative;
-      transform: translateY(8px);
-      opacity:0;
-      animation: enter .7s ease forwards;
-    }
-    .heroCard:before{
-      content:"";
-      position:absolute; inset:-2px;
-      background: radial-gradient(400px 300px at 20% 10%, rgba(124,58,237,.30), transparent 60%),
-                  radial-gradient(420px 320px at 80% 0%, rgba(6,182,212,.24), transparent 60%);
-      pointer-events:none;
-    }
-
-    @keyframes enter{
-      to{ transform: translateY(0); opacity:1; }
-    }
-
-    h1{
-      margin:0;
-      font-size: clamp(34px, 3.5vw, 52px);
-      line-height:1.05;
-      letter-spacing:-.8px;
-    }
-    .sub{
-      margin-top:12px;
-      max-width: 56ch;
-      color: var(--muted);
-      font-size: 15px;
-      line-height:1.6;
-    }
-
-    .ctaRow{
-      margin-top:18px;
-      display:flex;
-      gap:12px;
+    .nav{
+      display:flex; align-items:center; gap:14px;
       flex-wrap:wrap;
-      align-items:center;
+      justify-content:center;
+    }
+    .nav a{
+      font-size:13px; color:var(--muted);
+      padding:8px 10px; border-radius:10px;
+      transition: background .2s ease, color .2s ease;
+    }
+    .nav a:hover{
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+    }
+
+    .nav-actions{
+      display:flex; align-items:center; gap:10px;
+      min-width: 220px;
+      justify-content:flex-end;
     }
 
     .btn{
-      border:0;
-      cursor:pointer;
-      padding: 12px 16px;
-      border-radius: 14px;
-      font-weight:700;
-      font-size:14px;
-      letter-spacing:.1px;
-      transition: transform .15s ease, box-shadow .15s ease, background .15s ease, opacity .15s ease;
-      user-select:none;
-      display:inline-flex; align-items:center; gap:10px;
-    }
-    .btnPrimary{
-      color:white;
-      background: linear-gradient(135deg, rgba(124,58,237,1), rgba(6,182,212,1));
-      box-shadow: 0 18px 40px rgba(124,58,237,.26);
-    }
-    .btnPrimary:hover{ transform: translateY(-1px); box-shadow: 0 22px 55px rgba(124,58,237,.32); }
-    .btnGhost{
-      color: rgba(255,255,255,.9);
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.14);
-    }
-    .btnGhost:hover{ transform: translateY(-1px); background: rgba(255,255,255,.08); }
-
-    .btn:active{ transform: translateY(0); }
-
-    .miniStats{
-      margin-top:20px;
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap:10px;
-    }
-    .stat{
       border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      border-radius: 16px;
-      padding: 12px 12px;
-    }
-    .stat .k{ font-size:12px; color: rgba(255,255,255,.72); }
-    .stat .v{ margin-top:6px; font-size:18px; font-weight:800; letter-spacing:-.3px; }
-
-    /* right side card */
-    .side{
-      padding: 22px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      gap:14px;
-    }
-    .sideTop{
-      display:flex; flex-direction:column; gap:12px;
-    }
-    .badge{
-      width: fit-content;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.06);
-      font-size:12px;
-      color: rgba(255,255,255,.86);
+      color: var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:13px;
+      font-weight:600;
+      cursor:pointer;
+      transition: transform .15s ease, background .2s ease, border .2s ease;
+      display:inline-flex; align-items:center; gap:8px;
+      user-select:none;
     }
-    .list{
-      margin:0; padding:0; list-style:none;
-      display:grid; gap:10px;
+    .btn:hover{ background: rgba(255,255,255,.09); transform: translateY(-1px); }
+    .btn:active{ transform: translateY(0px); }
+
+    .btn-primary{
+      border:0;
+      background: linear-gradient(90deg, rgba(45,212,191,.95), rgba(96,165,250,.95));
+      color:#07111f;
+      box-shadow: 0 14px 40px rgba(45,212,191,.12), 0 18px 55px rgba(96,165,250,.12);
     }
-    .li{
-      display:flex; gap:10px; align-items:flex-start;
-      padding: 12px;
-      border-radius: 16px;
-      background: rgba(255,255,255,.04);
+    .btn-primary:hover{ filter: brightness(1.02); }
+
+    /* Sections */
+    section{ padding: 34px 0; }
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:18px;
+    }
+    @media (max-width: 920px){
+      .grid{ grid-template-columns: 1fr; }
+      .brand, .nav-actions{ min-width: unset; }
+      .topbar-inner{ flex-wrap:wrap; justify-content:center; }
+      .brand{ justify-content:center; }
+      .nav-actions{ justify-content:center; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      position:relative;
+      overflow:hidden;
+    }
+    .card::after{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(600px 220px at 30% 0%, rgba(45,212,191,.14), transparent 50%),
+                  radial-gradient(520px 240px at 80% 10%, rgba(167,139,250,.12), transparent 55%);
+      pointer-events:none;
+    }
+    .card > *{ position:relative; z-index:1; }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:12px; color: rgba(255,255,255,.80);
+      background: rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.10);
+      border-radius: 999px;
+      padding: 6px 10px;
     }
     .dot{
-      width:10px; height:10px; border-radius:50%;
-      margin-top: 4px;
-      background: linear-gradient(135deg, rgba(124,58,237,1), rgba(6,182,212,1));
-      box-shadow: 0 0 0 6px rgba(124,58,237,.12);
+      width:8px; height:8px; border-radius:999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(45,212,191,.12);
+    }
+
+    .hero-title{
+      margin: 12px 0 10px;
+      font-size: 44px;
+      line-height: 1.04;
+      letter-spacing: -1px;
+    }
+    @media (max-width: 520px){
+      .hero-title{ font-size: 36px; }
+    }
+    .hero-sub{
+      margin:0 0 18px;
+      color: var(--muted);
+      line-height:1.6;
+      max-width: 56ch;
+    }
+
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+      margin-top: 14px;
+    }
+    @media (max-width: 520px){
+      .kpis{ grid-template-columns: 1fr; }
+    }
+    .kpi{
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+    .kpi .t{ font-size:12px; color: var(--muted2); }
+    .kpi .v{ font-size:18px; font-weight:700; margin-top:4px; }
+
+    .list{
+      display:flex; flex-direction:column; gap:10px;
+      margin-top: 10px;
+    }
+    .item{
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display:flex; gap:10px;
+    }
+    .item .icon{
+      width:28px; height:28px; border-radius:10px;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      display:grid; place-items:center;
       flex: 0 0 auto;
     }
-    .li b{ display:block; font-size:13px; }
-    .li span{ display:block; font-size:12px; color: rgba(255,255,255,.70); margin-top:3px; line-height:1.45; }
+    .item h3{ margin:0; font-size:13px; }
+    .item p{ margin:3px 0 0; font-size:12px; color: var(--muted2); line-height:1.45; }
 
-    /* modal */
+    /* How it works */
+    .steps{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    @media (max-width: 920px){ .steps{ grid-template-columns: 1fr; } }
+    .step{
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      padding: 14px;
+    }
+    .step .n{
+      width:30px; height:30px; border-radius:10px;
+      display:grid; place-items:center;
+      background: rgba(45,212,191,.14);
+      border:1px solid rgba(45,212,191,.22);
+      color: rgba(255,255,255,.92);
+      font-weight:700;
+      margin-bottom: 10px;
+    }
+    .step h4{ margin:0 0 6px; font-size:14px; }
+    .step p{ margin:0; color: var(--muted2); font-size:13px; line-height:1.55; }
+
+    /* Contact */
+    .contact-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width: 920px){ .contact-grid{ grid-template-columns: 1fr; } }
+    .contact-card{
+      background: rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    .contact-card h3{ margin:0 0 6px; font-size:14px; }
+    .contact-card .line{
+      display:flex; gap:10px; align-items:center;
+      padding:10px 0;
+      border-top:1px solid rgba(255,255,255,.06);
+    }
+    .contact-card .line:first-of-type{ border-top:0; padding-top:0; }
+    .contact-card .label{ color: var(--muted2); font-size:12px; width: 92px; }
+    .contact-card .value{ font-size:13px; }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      color: var(--muted);
+      font-size:12px;
+    }
+
+    footer{
+      padding: 24px 0 40px;
+      color: rgba(255,255,255,.45);
+      font-size:12px;
+      text-align:center;
+    }
+
+    /* Modal */
     .overlay{
       position:fixed; inset:0;
       background: rgba(0,0,0,.55);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
       display:none;
       align-items:center;
       justify-content:center;
       padding: 18px;
-      z-index: 50;
+      z-index: 100;
     }
     .overlay.show{ display:flex; }
-
     .modal{
       width: min(760px, 100%);
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      transform: translateY(12px) scale(.98);
-      opacity:0;
-      transition: .22s ease;
-      position:relative;
-    }
-    .overlay.show .modal{
-      transform: translateY(0) scale(1);
-      opacity:1;
-    }
-    .modalHeader{
-      display:flex; align-items:center; justify-content:space-between;
-      padding: 16px 18px;
-      border-bottom: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-    }
-    .modalHeader b{ font-size:14px; letter-spacing:.2px; }
-    .x{
-      width:40px; height:40px; border-radius: 12px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.05));
       border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.9);
-      cursor:pointer;
-      transition:.15s ease;
+      box-shadow: 0 24px 80px rgba(0,0,0,.60);
+      overflow:hidden;
+      transform: translateY(10px) scale(.98);
+      opacity: 0;
+      transition: transform .18s ease, opacity .18s ease;
     }
-    .x:hover{ background: rgba(255,255,255,.10); transform: translateY(-1px); }
-    .modalBody{
-      padding: 18px;
+    .overlay.show .modal{ transform: translateY(0) scale(1); opacity: 1; }
+
+    .modal-head{
+      padding: 14px 16px;
+      display:flex; align-items:center; justify-content:space-between;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .modal-head .t{
+      display:flex; flex-direction:column;
+      gap:2px;
+    }
+    .modal-head .t strong{ font-size: 14px; }
+    .modal-head .t span{ font-size: 12px; color: var(--muted2); }
+    .x{
+      width:40px; height:40px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      color: var(--text);
+      cursor:pointer;
+      display:grid; place-items:center;
+      transition: background .2s ease, transform .15s ease;
+    }
+    .x:hover{ background: rgba(255,255,255,.09); transform: translateY(-1px); }
+
+    .modal-body{ padding: 16px; }
+    .form-grid{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      gap:12px;
     }
-    .field{ grid-column: span 1; }
-    .field.full{ grid-column: 1 / -1; }
+    @media (max-width: 720px){ .form-grid{ grid-template-columns: 1fr; } }
+
     label{
-      display:flex; align-items:center; justify-content:space-between;
-      font-size:12px;
-      color: rgba(255,255,255,.78);
-      margin-bottom:7px;
+      display:flex; justify-content:space-between; align-items:center;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 6px;
     }
-    .hint{
-      font-size:11px;
-      color: rgba(255,255,255,.55);
-    }
+    .req{ font-size: 11px; color: rgba(255,255,255,.40); }
     input, textarea, select{
       width:100%;
       padding: 12px 12px;
       border-radius: 14px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(12,14,34,.35);
-      color: rgba(255,255,255,.92);
-      outline:none;
-      transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
-    }
-    textarea{ min-height: 130px; resize: vertical; }
-    input:focus, textarea:focus, select:focus{
-      border-color: rgba(6,182,212,.55);
-      box-shadow: 0 0 0 5px rgba(6,182,212,.14);
-    }
-
-    .modalFooter{
-      padding: 16px 18px;
-      border-top: 1px solid rgba(255,255,255,.10);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-      background: rgba(255,255,255,.03);
-    }
-    .small{
-      font-size:12px;
-      color: rgba(255,255,255,.60);
-      line-height:1.35;
-    }
-    .sendBtn{
-      min-width: 170px;
-      justify-content:center;
-      position:relative;
-      overflow:hidden;
-    }
-    .sendBtn[disabled]{ opacity:.65; cursor:not-allowed; transform:none !important; }
-
-    /* fancy shine */
-    .sendBtn:before{
-      content:"";
-      position:absolute;
-      top:-60px; left:-60px;
-      width:120px; height:160px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);
-      transform: rotate(25deg);
-      opacity:0;
-    }
-    .sendBtn:hover:before{
-      animation: shine .9s ease;
-    }
-    @keyframes shine{
-      0%{ transform: translateX(-30px) rotate(25deg); opacity:0; }
-      20%{ opacity:.8; }
-      100%{ transform: translateX(360px) rotate(25deg); opacity:0; }
-    }
-
-    /* toast */
-    .toast{
-      position:fixed;
-      right:16px;
-      bottom:16px;
-      width: min(380px, calc(100% - 32px));
-      border-radius: 18px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(12,14,34,.55);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 18px 60px rgba(0,0,0,.45);
-      padding: 12px 14px;
-      display:none;
-      z-index: 60;
-      transform: translateY(10px);
-      opacity:0;
-      transition: .22s ease;
-    }
-    .toast.show{
-      display:block;
-      transform: translateY(0);
-      opacity:1;
-    }
-    .toastRow{
-      display:flex; align-items:flex-start; gap:10px;
-    }
-    .icon{
-      width:34px; height:34px; border-radius: 12px;
-      display:grid; place-items:center;
-      background: rgba(255,255,255,.08);
       border: 1px solid rgba(255,255,255,.12);
-      flex:0 0 auto;
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      outline: none;
+      font-size: 13px;
+      transition: border .2s ease, box-shadow .2s ease, transform .15s ease;
     }
-    .toast b{ font-size:13px; display:block; }
-    .toast span{ font-size:12px; color: rgba(255,255,255,.68); display:block; margin-top:2px; line-height:1.35; }
+    textarea{ min-height: 120px; resize: vertical; }
+    input:focus, textarea:focus, select:focus{
+      border-color: rgba(45,212,191,.40);
+      box-shadow: 0 0 0 4px rgba(45,212,191,.12);
+    }
 
-    /* footer note */
-    .note{
-      margin-top:18px;
-      color: rgba(255,255,255,.55);
+    .modal-foot{
+      padding: 14px 16px;
+      border-top:1px solid rgba(255,255,255,.08);
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .helper{
+      color: rgba(255,255,255,.52);
       font-size: 12px;
-      text-align:center;
+      line-height: 1.3;
     }
 
-    /* responsive */
-    @media (max-width: 920px){
-      .hero{ grid-template-columns: 1fr; }
-      .miniStats{ grid-template-columns: 1fr; }
-      .modalBody{ grid-template-columns: 1fr; }
-      .field{ grid-column: 1 / -1; }
+    .msg{
+      margin-top: 10px;
+      font-size: 13px;
+      min-height: 18px;
+    }
+    .msg.ok{ color: var(--ok); }
+    .msg.err{ color: var(--danger); }
+
+    /* Smooth entrance on load */
+    .fade-in{
+      animation: fadeIn .6s ease both;
+    }
+    @keyframes fadeIn{
+      from{ opacity:0; transform: translateY(8px); }
+      to{ opacity:1; transform: translateY(0); }
     }
   </style>
 </head>
-
 <body>
-  <div class="blob one"></div>
-  <div class="blob two"></div>
-  <div class="blob three"></div>
+  <div class="noise"></div>
 
-  <div class="wrap">
-
-    <div class="topbar">
+  <div class="topbar">
+    <div class="topbar-inner">
       <div class="brand">
-        <div class="logo"></div>
+        <div class="logo" aria-hidden="true"></div>
         <div>
-          Support Desk
-          <div style="font-size:11px; color: rgba(255,255,255,.62); font-weight:600; margin-top:2px;">
-            Powered by Activepieces
-          </div>
+          <h1>Support Desk</h1>
+          <p>Activepieces Ticket Portal</p>
         </div>
       </div>
-      <div class="pill">Fast • Professional • Organized</div>
-    </div>
 
-    <div class="hero">
-      <div class="heroCard">
-        <div class="pill" style="display:inline-flex; align-items:center; gap:8px;">
-          <span style="width:7px;height:7px;border-radius:99px;background:rgba(34,197,94,.9);display:inline-block;"></span>
-          Customer Support Tickets
-        </div>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="#home">Home</a>
+        <a href="#how">How it works</a>
+        <a href="#contact">Contact</a>
+      </nav>
 
-        <h1>Submit a ticket<br/>in a premium way.</h1>
-        <div class="sub">
-          A real support portal experience: smooth UI, clean validations, loading states, and instant delivery to your Activepieces workflow.
-        </div>
-
-        <div class="ctaRow">
-          <button class="btn btnPrimary" onclick="openModal()">
-            ✨ Create Ticket
-          </button>
-          <button class="btn btnGhost" onclick="scrollToHow()">
-            See how it works
-          </button>
-        </div>
-
-        <div class="miniStats" id="how">
-          <div class="stat">
-            <div class="k">Response SLA</div>
-            <div class="v">Automated</div>
-          </div>
-          <div class="stat">
-            <div class="k">Routing</div>
-            <div class="v">Smart</div>
-          </div>
-          <div class="stat">
-            <div class="k">Delivery</div>
-            <div class="v">Instant</div>
-          </div>
-        </div>
-
-        <div class="note">Tip: click “Create Ticket” → form opens with animations.</div>
-      </div>
-
-      <div class="heroCard side" style="animation-delay:.06s;">
-        <div class="sideTop">
-          <div class="badge">What you’ll get</div>
-          <ul class="list">
-            <li class="li">
-              <div class="dot"></div>
-              <div>
-                <b>Luxury UI interactions</b>
-                <span>Animations, blur glass, gradients, and smooth transitions.</span>
-              </div>
-            </li>
-            <li class="li">
-              <div class="dot"></div>
-              <div>
-                <b>Clean validations</b>
-                <span>Professional messages and real-time feedback.</span>
-              </div>
-            </li>
-            <li class="li">
-              <div class="dot"></div>
-              <div>
-                <b>Direct webhook delivery</b>
-                <span>Tickets go straight into your Activepieces automation.</span>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        <button class="btn btnPrimary" onclick="openModal()" style="justify-content:center;">
-          Open Ticket Form →
-        </button>
+      <div class="nav-actions">
+        <button class="btn" onclick="scrollToHow()">How it works</button>
+        <button class="btn btn-primary" onclick="openModal()">Create Ticket</button>
       </div>
     </div>
-
   </div>
 
-  <!-- Modal -->
+  <main class="container">
+    <!-- HERO -->
+    <section id="home" class="fade-in">
+      <div class="grid">
+        <div class="card">
+          <span class="pill"><span class="dot"></span> Customer Support Tickets</span>
+          <h2 class="hero-title">Submit support tickets<br/>the professional way.</h2>
+          <p class="hero-sub">
+            This website is a task-based demo showing a complete flow:
+            a user submits a ticket → it is processed by <strong>Activepieces</strong> → saved to Google Sheets → triaged automatically.
+          </p>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="openModal()">Create Ticket</button>
+            <button class="btn" onclick="scrollToHow()">See workflow</button>
+          </div>
+
+          <div class="kpis">
+            <div class="kpi">
+              <div class="t">Routing</div>
+              <div class="v">Automated</div>
+            </div>
+            <div class="kpi">
+              <div class="t">Storage</div>
+              <div class="v">Google Sheets</div>
+            </div>
+            <div class="kpi">
+              <div class="t">Delivery</div>
+              <div class="v">Webhook</div>
+            </div>
+          </div>
+
+          <div style="margin-top:14px; color:rgba(255,255,255,.45); font-size:12px;">
+            Tip: click “Create Ticket” — the form opens in a modal with smooth transitions.
+          </div>
+        </div>
+
+        <div class="card">
+          <span class="pill">What you’ll get</span>
+
+          <div class="list">
+            <div class="item">
+              <div class="icon">✦</div>
+              <div>
+                <h3>Clean UI interactions</h3>
+                <p>Subtle motion, accessible layout, and consistent spacing — no “AI look”.</p>
+              </div>
+            </div>
+            <div class="item">
+              <div class="icon">✓</div>
+              <div>
+                <h3>Proper validations</h3>
+                <p>Client-side validation and clear feedback while sending.</p>
+              </div>
+            </div>
+            <div class="item">
+              <div class="icon">↯</div>
+              <div>
+                <h3>Direct webhook delivery</h3>
+                <p>Tickets go straight to Activepieces automation instantly.</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+            <span class="badge">Fast</span>
+            <span class="badge">Professional</span>
+            <span class="badge">Organized</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW -->
+    <section id="how" class="fade-in">
+      <div class="card">
+        <span class="pill">How it works</span>
+        <h3 style="margin:10px 0 14px; font-size:18px;">Activepieces automation workflow</h3>
+
+        <div class="steps">
+          <div class="step">
+            <div class="n">1</div>
+            <h4>Submit ticket</h4>
+            <p>User fills the form → website sends a JSON payload to your Activepieces webhook.</p>
+          </div>
+          <div class="step">
+            <div class="n">2</div>
+            <h4>Triaging</h4>
+            <p>Activepieces runs your LLM policy + calculations (priority, risk, SLA deadline, etc.).</p>
+          </div>
+          <div class="step">
+            <div class="n">3</div>
+            <h4>Save & track</h4>
+            <p>Ticket is stored in Google Sheets with a hash + duplicate check for reliability.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="fade-in">
+      <div class="card">
+        <span class="pill">Contact</span>
+        <h3 style="margin:10px 0 14px; font-size:18px;">Reach me</h3>
+
+        <div class="contact-grid">
+          <div class="contact-card">
+            <h3>Direct</h3>
+            <div class="line">
+              <div class="label">KSA</div>
+              <div class="value"><a href="tel:+966596624652">+966 59 662 4652</a></div>
+            </div>
+            <div class="line">
+              <div class="label">Jordan</div>
+              <div class="value"><a href="tel:+962798343107">+962 79 834 3107</a></div>
+            </div>
+            <div class="line">
+              <div class="label">Gmail</div>
+              <div class="value"><a href="mailto:alihuzayen22@gmail.com">alihuzayen22@gmail.com</a></div>
+            </div>
+          </div>
+
+          <div class="contact-card">
+            <h3>Social</h3>
+            <div class="line">
+              <div class="label">LinkedIn</div>
+              <div class="value"><a target="_blank" rel="noopener" href="https://sa.linkedin.com/in/alihuzain">sa.linkedin.com/in/alihuzain</a></div>
+            </div>
+            <div class="line">
+              <div class="label">Instagram</div>
+              <div class="value"><a target="_blank" rel="noopener" href="https://instagram.com/alihuzain1">instagram.com/alihuzain1</a></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px; color:rgba(255,255,255,.45); font-size:12px;">
+          This portal is built as a task demo integrating a real automation pipeline using Activepieces.
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      © <span id="year"></span> — Support Desk Demo • Built with Activepieces automation
+    </footer>
+  </main>
+
+  <!-- MODAL -->
   <div class="overlay" id="overlay" onclick="overlayClick(event)">
-    <div class="modal" role="dialog" aria-modal="true" aria-label="Ticket form">
-      <div class="modalHeader">
-        <b>New Support Ticket</b>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <div class="t">
+          <strong id="modalTitle">New Support Ticket</strong>
+          <span>Tickets are sent to Activepieces webhook as JSON.</span>
+        </div>
         <button class="x" onclick="closeModal()" aria-label="Close">✕</button>
       </div>
 
-      <div class="modalBody">
-        <div class="field">
-          <label>Your Name <span class="hint">required</span></label>
-          <input id="name" placeholder="e.g. Ali Huzain" autocomplete="name" />
-        </div>
-        <div class="field">
-          <label>Your Email <span class="hint">required</span></label>
-          <input id="email" placeholder="e.g. ali@email.com" autocomplete="email" />
+      <div class="modal-body">
+        <div class="form-grid">
+          <div>
+            <label>Your Name <span class="req">required</span></label>
+            <input id="name" placeholder="e.g. Ali Huzain" autocomplete="name" />
+          </div>
+          <div>
+            <label>Your Email <span class="req">required</span></label>
+            <input id="email" placeholder="e.g. ali@email.com" autocomplete="email" />
+          </div>
         </div>
 
-        <div class="field full">
-          <label>Subject <span class="hint">required</span></label>
+        <div style="margin-top:12px;">
+          <label>Subject <span class="req">required</span></label>
           <input id="subject" placeholder="Short summary" />
         </div>
 
-        <div class="field full">
-          <label>Message <span class="hint">required</span></label>
+        <div style="margin-top:12px;">
+          <label>Message <span class="req">required</span></label>
           <textarea id="message" placeholder="Describe your issue..."></textarea>
         </div>
 
-        <div class="field full">
-          <label>Category <span class="hint">required</span></label>
+        <div style="margin-top:12px;">
+          <label>Category <span class="req">required</span></label>
           <select id="category">
             <option>Billing</option>
             <option>Technical Issue</option>
@@ -557,133 +625,113 @@
             <option>General Inquiry</option>
           </select>
         </div>
+
+        <div class="msg" id="msg"></div>
       </div>
 
-      <div class="modalFooter">
-        <div class="small">
+      <div class="modal-foot">
+        <div class="helper">
           We’ll review your request and respond as soon as possible.
         </div>
-        <button class="btn btnPrimary sendBtn" id="btn" onclick="sendTicket()">
-          <span id="btnText">Send Ticket</span>
-        </button>
+        <button class="btn btn-primary" id="btn" onclick="sendTicket()">Send Ticket</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast -->
-  <div class="toast" id="toast">
-    <div class="toastRow">
-      <div class="icon" id="toastIcon">✨</div>
-      <div>
-        <b id="toastTitle">Done</b>
-        <span id="toastText">Message</span>
-      </div>
-    </div>
-  </div>
+  <script>
+    // ✅ Put your real webhook URL here
+    const WEBHOOK_URL = "PUT_YOUR_ACTIVEPIECES_WEBHOOK_URL_HERE";
 
-<script>
-  const WEBHOOK_URL = "https://cloud.activepieces.com/api/v1/webhooks/UnLMXk61h1UlcIWNTo5VT";
-
-  function isEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
-
-  function openModal(){
-    document.getElementById("overlay").classList.add("show");
-    setTimeout(()=> document.getElementById("name").focus(), 120);
-    document.body.style.overflow = "hidden";
-  }
-  function closeModal(){
-    document.getElementById("overlay").classList.remove("show");
-    document.body.style.overflow = "";
-  }
-  function overlayClick(e){
-    if(e.target.id === "overlay") closeModal();
-  }
-  function scrollToHow(){
-    document.getElementById("how").scrollIntoView({behavior:"smooth", block:"center"});
-  }
-
-  function toast(type, title, text){
-    const el = document.getElementById("toast");
-    const icon = document.getElementById("toastIcon");
-    const t = document.getElementById("toastTitle");
-    const d = document.getElementById("toastText");
-
-    t.textContent = title;
-    d.textContent = text;
-
-    if(type === "ok"){
-      icon.textContent = "✅";
-      icon.style.boxShadow = "0 0 0 6px rgba(34,197,94,.14)";
-      icon.style.borderColor = "rgba(34,197,94,.35)";
-    }else{
-      icon.textContent = "⚠️";
-      icon.style.boxShadow = "0 0 0 6px rgba(239,68,68,.14)";
-      icon.style.borderColor = "rgba(239,68,68,.35)";
-    }
-
-    el.classList.add("show");
-    clearTimeout(window.__toastTimer);
-    window.__toastTimer = setTimeout(()=> el.classList.remove("show"), 3200);
-  }
-
-  // ESC to close modal
-  window.addEventListener("keydown", (e)=>{
-    if(e.key === "Escape"){
-      const overlay = document.getElementById("overlay");
-      if(overlay.classList.contains("show")) closeModal();
-    }
-  });
-
-  async function sendTicket(){
+    const overlay = document.getElementById("overlay");
+    const msg = document.getElementById("msg");
     const btn = document.getElementById("btn");
-    const btnText = document.getElementById("btnText");
 
-    const data = {
-      name: document.getElementById("name").value.trim(),
-      email: document.getElementById("email").value.trim(),
-      subject: document.getElementById("subject").value.trim(),
-      message: document.getElementById("message").value.trim(),
-      category: document.getElementById("category").value
-    };
+    document.getElementById("year").textContent = new Date().getFullYear();
 
-    if(!data.name || !data.email || !data.subject || !data.message){
-      toast("bad","Missing info","Please fill all required fields.");
-      return;
-    }
-    if(!isEmail(data.email)){
-      toast("bad","Invalid email","Please enter a valid email address.");
-      return;
+    function openModal(){
+      msg.textContent = "";
+      msg.className = "msg";
+      overlay.classList.add("show");
+      setTimeout(()=> document.getElementById("name").focus(), 60);
+      document.addEventListener("keydown", escClose);
     }
 
-    try{
-      btn.disabled = true;
-      btnText.textContent = "Sending...";
-
-      const res = await fetch(WEBHOOK_URL, {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify(data)
-      });
-
-      if(!res.ok) throw new Error("Request failed");
-
-      toast("ok","Ticket sent","We received your request. Thank you!");
-
-      // reset minimal
-      document.getElementById("subject").value = "";
-      document.getElementById("message").value = "";
-      document.getElementById("category").value = "Billing";
-
-      // small delay then close
-      setTimeout(()=> closeModal(), 550);
-
-    }catch(e){
-      toast("bad","Send failed","Please try again in a moment.");
-    }finally{
-      btn.disabled = false;
-      btnText.textContent = "Send Ticket";
+    function closeModal(){
+      overlay.classList.remove("show");
+      document.removeEventListener("keydown", escClose);
     }
-  }
-</script>
+
+    function escClose(e){
+      if(e.key === "Escape") closeModal();
+    }
+
+    function overlayClick(e){
+      if(e.target === overlay) closeModal();
+    }
+
+    function scrollToHow(){
+      document.getElementById("how").scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    function isEmail(v){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    }
+
+    async function sendTicket(){
+      msg.textContent = "";
+      msg.className = "msg";
+
+      const data = {
+        name: document.getElementById("name").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        subject: document.getElementById("subject").value.trim(),
+        message: document.getElementById("message").value.trim(),
+        category: document.getElementById("category").value
+      };
+
+      if(!data.name || !data.email || !data.subject || !data.message){
+        msg.textContent = "Please fill all required fields.";
+        msg.classList.add("err");
+        return;
+      }
+      if(!isEmail(data.email)){
+        msg.textContent = "Please enter a valid email address.";
+        msg.classList.add("err");
+        return;
+      }
+      if(!WEBHOOK_URL || WEBHOOK_URL.includes("PUT_YOUR_ACTIVEPIECES_WEBHOOK_URL_HERE")){
+        msg.textContent = "Webhook URL is not set yet.";
+        msg.classList.add("err");
+        return;
+      }
+
+      try{
+        btn.disabled = true;
+        btn.textContent = "Sending...";
+
+        const res = await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify(data)
+        });
+
+        if(!res.ok) throw new Error("Request failed");
+
+        msg.textContent = "Ticket sent successfully.";
+        msg.classList.add("ok");
+
+        // reset
+        document.getElementById("subject").value = "";
+        document.getElementById("message").value = "";
+        document.getElementById("category").value = "Billing";
+      }catch(e){
+        msg.textContent = "Failed to send. Please try again.";
+        msg.classList.add("err");
+      }finally{
+        btn.disabled = false;
+        btn.textContent = "Send Ticket";
+      }
+    }
+  </script>
 </body>
 </html>
