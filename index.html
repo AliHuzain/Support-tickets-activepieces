@@ -17,10 +17,7 @@
       --radius: 18px;
       --shadow: 0 18px 60px rgba(0,0,0,.20);
       --shadow-strong: 0 24px 80px rgba(0,0,0,.28);
-
       --ease: cubic-bezier(.2,.8,.2,1);
-
-      /* header height for anchor offset */
       --header-h: 76px;
 
       /* category accents */
@@ -51,10 +48,15 @@
       --danger:#ef4444;
       --ok:#22c55e;
 
-      --select-bg: rgba(10,14,24,.95);     /* for options panel */
+      --select-bg: rgba(10,14,24,.98);
       --input-bg: rgba(0,0,0,.22);
       --chip-bg: rgba(255,255,255,.06);
       --chip-bd: rgba(255,255,255,.10);
+
+      /* Orbs intensity */
+      --orb-a: .18;
+      --orb-b: .16;
+      --orb-c: .14;
     }
 
     /* Light */
@@ -62,8 +64,8 @@
       --bg: #fbf6ee;  /* creamy */
       --bg2:#f5efe5;
 
-      --card: rgba(255,255,255,.78);
-      --card2: rgba(255,255,255,.92);
+      --card: rgba(255,255,255,.82);
+      --card2: rgba(255,255,255,.94);
       --line: rgba(0,0,0,.08);
 
       --text: rgba(17,24,39,.92);
@@ -77,28 +79,44 @@
       --danger:#dc2626;
       --ok:#16a34a;
 
-      --select-bg: #ffffff;         /* for options panel */
-      --input-bg: rgba(255,255,255,.80);
+      --select-bg: #ffffff;
+      --input-bg: rgba(255,255,255,.86);
       --chip-bg: rgba(17,24,39,.06);
       --chip-bd: rgba(17,24,39,.10);
 
       --shadow: 0 16px 50px rgba(2,6,23,.10);
       --shadow-strong: 0 24px 70px rgba(2,6,23,.14);
+
+      --orb-a: .11;
+      --orb-b: .10;
+      --orb-c: .09;
     }
 
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
+    html{ scroll-behavior: smooth; }
+
     body{
       margin:0;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color: var(--text);
-      background:
-        radial-gradient(1100px 760px at 15% 10%, color-mix(in oklab, var(--accent3) 22%, transparent), transparent 60%),
-        radial-gradient(900px 700px at 85% 25%, color-mix(in oklab, var(--accent) 18%, transparent), transparent 62%),
-        radial-gradient(1000px 900px at 60% 110%, color-mix(in oklab, var(--accent2) 16%, transparent), transparent 60%),
-        linear-gradient(180deg, var(--bg), var(--bg2));
+
+      background: linear-gradient(180deg, var(--bg), var(--bg2));
       overflow-x:hidden;
       transition: background .35s var(--ease), color .35s var(--ease);
+    }
+
+    .orbs{
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(1200px 780px at 14% 10%, color-mix(in oklab, var(--accent3) calc(var(--orb-a) * 100%), transparent), transparent 60%),
+        radial-gradient(1000px 760px at 86% 18%, color-mix(in oklab, var(--accent) calc(var(--orb-b) * 100%), transparent), transparent 62%),
+        radial-gradient(1100px 900px at 60% 110%, color-mix(in oklab, var(--accent2) calc(var(--orb-c) * 100%), transparent), transparent 60%);
+      filter: saturate(1.05);
+      opacity: 1;
     }
 
     /* noise overlay subtle */
@@ -107,11 +125,17 @@
       position:fixed; inset:0; z-index:1;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='130' height='130'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='130' height='130' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
       mix-blend-mode: overlay;
-      opacity:.22;
+      opacity:.20;
     }
 
     a{ color:inherit; text-decoration:none; }
-    .container{ max-width:1100px; margin:0 auto; padding:24px; position:relative; z-index:2; }
+    .container{
+      max-width:1100px;
+      margin:0 auto;
+      padding:24px;
+      position:relative;
+      z-index:2;
+    }
 
     /* Fix anchor offset with sticky header */
     section{ scroll-margin-top: calc(var(--header-h) + 18px); }
@@ -205,7 +229,7 @@
     }
 
     .card{
-      background: linear-gradient(180deg, color-mix(in oklab, var(--card2) 80%, transparent), color-mix(in oklab, var(--card) 70%, transparent));
+      background: linear-gradient(180deg, color-mix(in oklab, var(--card2) 88%, transparent), color-mix(in oklab, var(--card) 76%, transparent));
       border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
@@ -215,18 +239,22 @@
       transform: translateY(10px);
       opacity:0;
       animation: cardIn .75s var(--ease) forwards;
+      isolation: isolate; /* helps prevent weird blending */
     }
     .card:nth-child(2){ animation-delay: .06s; }
-    @keyframes cardIn{
-      to{ transform: translateY(0); opacity:1; }
-    }
+    @keyframes cardIn{ to{ transform: translateY(0); opacity:1; } }
+
     .card::after{
       content:"";
       position:absolute; inset:-2px;
       background:
-        radial-gradient(620px 240px at 25% 0%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 58%),
-        radial-gradient(520px 240px at 80% 12%, color-mix(in oklab, var(--accent3) 12%, transparent), transparent 60%);
+        radial-gradient(620px 240px at 25% 0%, color-mix(in oklab, var(--accent) 10%, transparent), transparent 58%),
+        radial-gradient(520px 240px at 80% 12%, color-mix(in oklab, var(--accent3) 9%, transparent), transparent 60%);
       pointer-events:none;
+      opacity: .9;
+    }
+    [data-theme="light"] .card::after{
+      opacity: .55;
     }
     .card > *{ position:relative; z-index:1; }
 
@@ -275,7 +303,7 @@
       padding: 12px 14px;
       transition: transform .18s var(--ease), background .22s var(--ease);
     }
-    .kpi:hover{ transform: translateY(-2px); background: color-mix(in oklab, var(--card2) 70%, transparent); }
+    .kpi:hover{ transform: translateY(-2px); background: color-mix(in oklab, var(--card2) 74%, transparent); }
     .kpi .t{ font-size:12px; color: var(--muted2); }
     .kpi .v{ font-size:18px; font-weight:800; margin-top:4px; }
 
@@ -288,7 +316,7 @@
       display:flex; gap:10px;
       transition: transform .18s var(--ease), background .22s var(--ease);
     }
-    .item:hover{ transform: translateY(-2px); background: color-mix(in oklab, var(--card2) 70%, transparent); }
+    .item:hover{ transform: translateY(-2px); background: color-mix(in oklab, var(--card2) 74%, transparent); }
     .item .icon{
       width:28px; height:28px; border-radius:10px;
       background: color-mix(in oklab, var(--card2) 70%, transparent);
@@ -314,7 +342,7 @@
       padding: 14px;
       transition: transform .18s var(--ease), background .22s var(--ease);
     }
-    .step:hover{ transform: translateY(-2px); background: color-mix(in oklab, var(--card2) 70%, transparent); }
+    .step:hover{ transform: translateY(-2px); background: color-mix(in oklab, var(--card2) 74%, transparent); }
     .step .n{
       width:30px; height:30px; border-radius:10px;
       display:grid; place-items:center;
@@ -336,7 +364,7 @@
       padding: 16px;
       transition: transform .18s var(--ease), background .22s var(--ease);
     }
-    .contact-card:hover{ transform: translateY(-2px); background: color-mix(in oklab, var(--card2) 70%, transparent); }
+    .contact-card:hover{ transform: translateY(-2px); background: color-mix(in oklab, var(--card2) 74%, transparent); }
     .contact-card h3{ margin:0 0 6px; font-size:14px; font-weight:900; }
     .contact-card .line{
       display:flex; gap:10px; align-items:center;
@@ -347,6 +375,7 @@
     .contact-card .label{ color: var(--muted2); font-size:12px; width: 92px; }
     .contact-card .value{ font-size:13px; font-weight:600; }
     .contact-card .value a{ opacity:.95; }
+
     .badge{
       display:inline-flex; align-items:center; gap:8px;
       padding:8px 10px;
@@ -382,13 +411,14 @@
     .modal{
       width: min(820px, 100%);
       border-radius: 22px;
-      background: linear-gradient(180deg, color-mix(in oklab, var(--card2) 80%, transparent), color-mix(in oklab, var(--card) 70%, transparent));
+      background: linear-gradient(180deg, color-mix(in oklab, var(--card2) 88%, transparent), color-mix(in oklab, var(--card) 76%, transparent));
       border:1px solid var(--line);
       box-shadow: var(--shadow-strong);
       overflow:hidden;
       transform: translateY(14px) scale(.98);
       opacity: 0;
       transition: transform .22s var(--ease), opacity .22s var(--ease);
+      position: relative; /* ✅ needed for skeleton overlay */
     }
     .overlay.show .modal{ transform: translateY(0) scale(1); opacity: 1; }
 
@@ -446,7 +476,7 @@
       box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 14%, transparent);
     }
 
-    /* FIX #1: option colors in dark mode */
+    /* ✅ FIX: option colors in dark mode */
     select option{
       background: var(--select-bg);
       color: var(--text);
@@ -491,6 +521,53 @@
     .msg.ok{ color: var(--ok); }
     .msg.err{ color: var(--danger); }
 
+    /* =========================
+       ✅ NEW: Skeleton overlay while sending
+    ========================== */
+    .sending-mask{
+      position:absolute;
+      inset:0;
+      z-index: 10;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      background: color-mix(in oklab, var(--bg) 55%, transparent);
+      backdrop-filter: blur(10px);
+    }
+    .sending-mask.show{ display:flex; }
+
+    .skeleton-box{
+      width: min(520px, 100%);
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: color-mix(in oklab, var(--card2) 70%, transparent);
+      box-shadow: 0 18px 55px rgba(0,0,0,.18);
+      padding: 14px;
+    }
+
+    .sk-line{
+      height: 14px;
+      border-radius: 999px;
+      margin: 10px 0;
+      background: linear-gradient(
+        90deg,
+        color-mix(in oklab, var(--card) 70%, transparent),
+        color-mix(in oklab, var(--card2) 90%, transparent),
+        color-mix(in oklab, var(--card) 70%, transparent)
+      );
+      background-size: 240% 100%;
+      animation: shimmer 1.2s linear infinite;
+    }
+    .sk-line.big{ height: 18px; }
+    .sk-line.short{ width: 70%; }
+    .sk-line.tiny{ width: 45%; }
+
+    @keyframes shimmer{
+      0%{ background-position: 0% 0%; }
+      100%{ background-position: 240% 0%; }
+    }
+
     /* Explore spotlight intro */
     .intro{
       position:fixed; inset:0;
@@ -507,7 +584,6 @@
 
     .spotlight{
       position:absolute; inset:0;
-      /* the "candle" effect */
       background:
         radial-gradient(220px 220px at var(--mx, 50%) var(--my, 50%),
           rgba(255,255,255,.20),
@@ -563,7 +639,6 @@
       color: rgba(255,255,255,.55);
     }
 
-    /* small scroll hint */
     .hint{
       margin-top: 10px;
       display:inline-flex;
@@ -581,14 +656,16 @@
       0%,100%{ transform: scale(.9); opacity:.55; }
       50%{ transform: scale(1.1); opacity:1; }
     }
-
-    /* smooth scrolling */
-    html{ scroll-behavior: smooth; }
   </style>
 </head>
 
 <body data-theme="dark">
+  <!-- ✅ Orbs layer -->
+  <div class="orbs"></div>
   <div class="noise"></div>
+
+  <!-- ✅ Confetti canvas (خفيف) -->
+  <canvas id="confetti" style="position:fixed;inset:0;pointer-events:none;z-index:130;display:none;"></canvas>
 
   <!-- INTRO / EXPLORE -->
   <div class="intro" id="intro">
@@ -794,6 +871,18 @@
   <!-- MODAL -->
   <div class="overlay" id="overlay" onclick="overlayClick(event)">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+
+      <!-- ✅ Skeleton overlay (shows while sending) -->
+      <div class="sending-mask" id="sendingMask" aria-hidden="true">
+        <div class="skeleton-box">
+          <div class="sk-line big"></div>
+          <div class="sk-line short"></div>
+          <div class="sk-line"></div>
+          <div class="sk-line"></div>
+          <div class="sk-line tiny"></div>
+        </div>
+      </div>
+
       <div class="modal-head">
         <div class="t">
           <strong id="modalTitle">New Support Ticket</strong>
@@ -806,11 +895,11 @@
         <div class="form-grid">
           <div>
             <label>Your Name <span class="req">required</span></label>
-            <input id="name" placeholder="e.g. Ali Huzain" autocomplete="name" />
+            <input id="name" placeholder="e.g. John Doe" autocomplete="name" />
           </div>
           <div>
             <label>Your Email <span class="req">required</span></label>
-            <input id="email" placeholder="e.g. ali@email.com" autocomplete="email" />
+            <input id="email" placeholder="e.g. example@email.com" autocomplete="email" />
           </div>
         </div>
 
@@ -836,7 +925,6 @@
             </select>
           </div>
 
-          <!-- subtle “custom” category feedback without making it look AI -->
           <div class="cat-chip" id="catChip">
             <span class="cat-dot" id="catDot"></span>
             <span id="catText">Billing</span>
@@ -860,7 +948,7 @@
        CONFIG
     ========================== */
     // ✅ Put your REAL webhook URL here:
-    const WEBHOOK_URL = "PASTE_YOUR_ACTIVEPIECES_WEBHOOK_URL_HERE";
+    const WEBHOOK_URL = "https://cloud.activepieces.com/api/v1/webhooks/UnLMXk61h1UlcIWNTo5VT";
 
     const overlay = document.getElementById("overlay");
     const msg = document.getElementById("msg");
@@ -869,6 +957,7 @@
 
     const intro = document.getElementById("intro");
     const spotlight = document.getElementById("spotlight");
+    const sendingMask = document.getElementById("sendingMask");
 
     document.getElementById("year").textContent = new Date().getFullYear();
 
@@ -885,7 +974,6 @@
 
     function enterSite(){
       intro.classList.add("hidden");
-      // optional: focus for accessibility
       setTimeout(()=> document.querySelector('a[href="#home"]').focus?.(), 10);
     }
 
@@ -910,7 +998,6 @@
       const cur = document.body.getAttribute("data-theme") || "dark";
       themeBtn.textContent = (cur === "dark") ? "☾" : "☀";
       themeBtn.title = (cur === "dark") ? "Switch to light mode" : "Switch to dark mode";
-      // keep select chip consistent
       updateCategoryChip();
     }
 
@@ -928,6 +1015,7 @@
 
     function closeModal(){
       overlay.classList.remove("show");
+      setSending(false);
       document.removeEventListener("keydown", escClose);
     }
 
@@ -939,15 +1027,10 @@
       if(e.target === overlay) closeModal();
     }
 
-    /* =========================
-       NAV SCROLL FIX (#anchor)
-       (in case some browsers still offset weirdly)
-    ========================== */
     function scrollToHow(){
       document.getElementById("how").scrollIntoView({behavior:"smooth", block:"start"});
     }
 
-    // optional: improve hash navigation with offset
     function scrollWithOffset(id){
       const el = document.getElementById(id);
       if(!el) return;
@@ -969,7 +1052,7 @@
     });
 
     /* =========================
-       CATEGORY CHIP (subtle custom)
+       CATEGORY CHIP
     ========================== */
     function categoryColor(cat){
       cat = (cat || "").toLowerCase();
@@ -994,6 +1077,14 @@
         dot.style.boxShadow = `0 0 0 4px color-mix(in oklab, ${c} 14%, transparent)`;
       }
       if(text) text.textContent = cat;
+    }
+
+    /* =========================
+       SENDING (Skeleton overlay)
+    ========================== */
+    function setSending(v){
+      if(!sendingMask) return;
+      sendingMask.classList.toggle("show", !!v);
     }
 
     /* =========================
@@ -1025,7 +1116,7 @@
         msg.classList.add("err");
         return;
       }
-      if(!WEBHOOK_URL || WEBHOOK_URL.includes("PASTE_YOUR_ACTIVEPIECES_WEBHOOK_URL_HERE")){
+      if(!WEBHOOK_URL || WEBHOOK_URL.includes("https://cloud.activepieces.com/api/v1/webhooks/UnLMXk61h1UlcIWNTo5VT")){
         msg.textContent = "Webhook URL is not set yet.";
         msg.classList.add("err");
         return;
@@ -1034,6 +1125,7 @@
       try{
         btn.disabled = true;
         btn.textContent = "Sending...";
+        setSending(true);
 
         const res = await fetch(WEBHOOK_URL, {
           method: "POST",
@@ -1046,7 +1138,10 @@
         msg.textContent = "✅ Ticket sent successfully.";
         msg.classList.add("ok");
 
-        // reset (keep name/email for convenience)
+        // confetti (خفيف جدًا)
+        launchConfetti();
+
+        // reset (keep name/email)
         document.getElementById("subject").value = "";
         document.getElementById("message").value = "";
         document.getElementById("category").value = "Billing";
@@ -1056,9 +1151,74 @@
         msg.textContent = "❌ Failed to send. Please try again.";
         msg.classList.add("err");
       }finally{
+        setSending(false);
         btn.disabled = false;
         btn.textContent = "Send Ticket";
       }
+    }
+
+    /* =========================
+       ✅ Confetti (Light + not childish)
+    ========================== */
+    function launchConfetti(){
+      const canvas = document.getElementById("confetti");
+      if(!canvas) return;
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      canvas.style.display = "block";
+
+      const colors = [
+        getCss("--accent").trim() || "#2dd4bf",
+        getCss("--accent2").trim() || "#60a5fa",
+        getCss("--accent3").trim() || "#a78bfa"
+      ];
+
+      const parts = [];
+      const count = 70; // خفيف
+      for(let i=0;i<count;i++){
+        parts.push({
+          x: Math.random()*canvas.width,
+          y: -20 - Math.random()*200,
+          vx: (Math.random()-.5)*1.2,
+          vy: 2.8 + Math.random()*2.2,
+          r: 2.5 + Math.random()*2.5,
+          rot: Math.random()*Math.PI,
+          vr: (Math.random()-.5)*0.08,
+          a: 0.9,
+          c: colors[Math.floor(Math.random()*colors.length)]
+        });
+      }
+
+      let frames = 0;
+      const maxFrames = 70;
+
+      function tick(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        parts.forEach(p=>{
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vr;
+          p.a *= 0.985;
+
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, p.a);
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.c;
+          ctx.fillRect(-p.r, -p.r, p.r*2.2, p.r*2.2);
+          ctx.restore();
+        });
+
+        frames++;
+        if(frames < maxFrames){
+          requestAnimationFrame(tick);
+        } else {
+          canvas.style.display = "none";
+        }
+      }
+
+      tick();
     }
 
     // init chip on load
