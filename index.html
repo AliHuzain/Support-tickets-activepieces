@@ -1,623 +1,952 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Support Desk • Activepieces</title>
+  <title>Support Desk — Activepieces Ticket Portal</title>
 
-  <!-- Font (clean + professional) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
+    /* =========================
+       THEME TOKENS (DARK/LIGHT)
+       ========================= */
     :root{
-      --bg:#0b1020;
-      --card: rgba(255,255,255,.06);
-      --card2: rgba(255,255,255,.08);
-      --stroke: rgba(255,255,255,.10);
-      --text:#eaf0ff;
-      --muted: rgba(234,240,255,.72);
-      --muted2: rgba(234,240,255,.55);
-      --brand1:#7c3aed; /* purple */
-      --brand2:#06b6d4; /* cyan */
-      --ok:#22c55e;
-      --warn:#f59e0b;
-      --bad:#ef4444;
-      --shadow: 0 30px 90px rgba(0,0,0,.55);
-      --radius: 20px;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      color: var(--text);
-      background: radial-gradient(1200px 700px at 20% 10%, rgba(124,58,237,.55), transparent 60%),
-                  radial-gradient(900px 600px at 85% 18%, rgba(6,182,212,.45), transparent 55%),
-                  radial-gradient(900px 600px at 55% 95%, rgba(245,158,11,.25), transparent 55%),
-                  var(--bg);
-      overflow-x:hidden;
+      --radius: 18px;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --shadow-soft: 0 14px 44px rgba(0,0,0,.20);
+      --ease: cubic-bezier(.22,1,.36,1);
+      --dur: 220ms;
+
+      /* category base hues (used in both themes) */
+      --cat-billing:  170 92% 38%;
+      --cat-tech:     205 92% 50%;
+      --cat-feature:  265 92% 62%;
+      --cat-complaint:  8 85% 55%;
+      --cat-general:  48 90% 50%;
     }
 
-    /* Subtle animated noise + glow */
+    /* DARK (richer, brighter, comfy) */
+    html[data-theme="dark"]{
+      --bg: #0b1220;
+      --bg2:#0f1a2d;
+      --card: rgba(255,255,255,.065);
+      --card2: rgba(255,255,255,.085);
+      --line: rgba(255,255,255,.12);
+
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.70);
+      --muted2: rgba(255,255,255,.56);
+
+      --accent: #2dd4bf;
+      --accent2:#60a5fa;
+      --accent3:#a78bfa;
+
+      --danger:#ef4444;
+      --ok:#22c55e;
+
+      --topbar-bg: linear-gradient(to bottom, rgba(11,18,32,.88), rgba(11,18,32,.55));
+      --noise-opacity: .22;
+
+      --input-bg: rgba(0,0,0,.22);
+      --input-line: rgba(255,255,255,.14);
+      --input-focus: rgba(45,212,191,.45);
+
+      --chip-bg: rgba(255,255,255,.06);
+      --chip-line: rgba(255,255,255,.12);
+    }
+
+    /* LIGHT (creamy + colorful but soft) */
+    html[data-theme="light"]{
+      --bg: #fbf7ef;      /* creamy */
+      --bg2:#f5efe4;      /* slightly deeper cream */
+      --card: rgba(255,255,255,.82);
+      --card2: rgba(255,255,255,.92);
+      --line: rgba(20,25,35,.10);
+
+      --text: rgba(18,22,30,.92);
+      --muted: rgba(18,22,30,.68);
+      --muted2: rgba(18,22,30,.52);
+
+      --accent: #0ea5a5;  /* teal */
+      --accent2:#2563eb;  /* blue */
+      --accent3:#7c3aed;  /* violet */
+
+      --danger:#dc2626;
+      --ok:#16a34a;
+
+      --topbar-bg: linear-gradient(to bottom, rgba(251,247,239,.86), rgba(251,247,239,.55));
+      --noise-opacity: .10;
+
+      --input-bg: rgba(255,255,255,.70);
+      --input-line: rgba(20,25,35,.16);
+      --input-focus: rgba(14,165,165,.35);
+
+      --chip-bg: rgba(20,25,35,.05);
+      --chip-line: rgba(20,25,35,.12);
+
+      --shadow: 0 18px 60px rgba(20,25,35,.14);
+      --shadow-soft: 0 14px 44px rgba(20,25,35,.10);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 800px at 15% 10%, color-mix(in oklab, var(--accent3) 22%, transparent), transparent 60%),
+        radial-gradient(900px 700px at 85% 25%, color-mix(in oklab, var(--accent) 18%, transparent), transparent 60%),
+        radial-gradient(1000px 900px at 60% 110%, color-mix(in oklab, var(--accent2) 16%, transparent), transparent 60%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      overflow-x:hidden;
+      transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+    }
+
+    /* Subtle noise (theme aware) */
     .noise{
-      position:fixed; inset:0;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
-      mix-blend-mode: overlay;
       pointer-events:none;
-      opacity:.18;
+      position:fixed; inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.15'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+      opacity: var(--noise-opacity);
+      transition: opacity var(--dur) var(--ease);
     }
-    .wrap{
-      max-width: 1120px;
-      margin: 26px auto 70px;
-      padding: 0 18px;
+
+    a{ color:inherit; text-decoration:none; }
+    .container{ max-width:1100px; margin:0 auto; padding:24px; }
+
+    /* Top nav */
+    .topbar{
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(16px);
+      background: var(--topbar-bg);
+      border-bottom: 1px solid color-mix(in oklab, var(--line) 70%, transparent);
     }
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:14px;
-      padding:14px 16px;
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.04);
-      border-radius: 999px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 18px 60px rgba(0,0,0,.28);
-      position: sticky;
-      top: 14px;
-      z-index: 10;
+    .topbar-inner{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:16px; padding:16px 24px;
+      max-width:1100px; margin:0 auto;
     }
     .brand{
-      display:flex; align-items:center; gap:10px;
+      display:flex; align-items:center; gap:12px;
       min-width: 220px;
+      transform: translateZ(0);
     }
     .logo{
-      width: 36px; height:36px; border-radius: 12px;
-      background: linear-gradient(135deg, var(--brand1), var(--brand2));
-      box-shadow: 0 10px 30px rgba(124,58,237,.35);
+      width:38px; height:38px; border-radius:12px;
+      background:
+        radial-gradient(circle at 30% 30%, color-mix(in oklab, var(--accent) 92%, transparent), transparent 55%),
+        radial-gradient(circle at 70% 70%, color-mix(in oklab, var(--accent3) 85%, transparent), transparent 55%),
+        rgba(255,255,255,.08);
+      border:1px solid color-mix(in oklab, var(--line) 75%, transparent);
+      box-shadow: var(--shadow-soft);
       position:relative;
       overflow:hidden;
     }
     .logo::after{
       content:"";
-      position:absolute; inset:-40%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.65), transparent);
-      transform: rotate(25deg);
-      animation: shine 3.8s infinite;
+      position:absolute; inset:-60%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+      transform: rotate(25deg) translateX(-60%);
+      animation: shine 4.4s infinite;
+      opacity:.45;
     }
     @keyframes shine{
-      0%{transform:translateX(-60%) rotate(25deg)}
-      55%{transform:translateX(120%) rotate(25deg)}
-      100%{transform:translateX(120%) rotate(25deg)}
+      0%{transform: rotate(25deg) translateX(-60%);}
+      55%{transform: rotate(25deg) translateX(125%);}
+      100%{transform: rotate(25deg) translateX(125%);}
     }
-    .brand b{display:block; font-size:14px; letter-spacing:.2px}
-    .brand span{display:block; font-size:12px; color:var(--muted2)}
-    nav{
-      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
+    .brand h1{
+      font-size: 14px; margin:0; font-weight:700; letter-spacing:.2px;
     }
-    nav a{
-      color: var(--muted);
-      text-decoration:none;
-      font-size:13px;
-      padding:10px 12px;
-      border-radius: 999px;
-      border:1px solid transparent;
-      transition:.2s ease;
+    .brand p{
+      margin:2px 0 0; font-size:12px; color:var(--muted2);
     }
-    nav a:hover{
-      border-color: var(--stroke);
-      background: rgba(255,255,255,.05);
+
+    .nav{
+      display:flex; align-items:center; gap:14px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+    .nav a{
+      font-size:13px; color:var(--muted);
+      padding:8px 10px; border-radius:10px;
+      transition: background var(--dur) var(--ease), color var(--dur) var(--ease), transform var(--dur) var(--ease);
+    }
+    .nav a:hover{
+      background: color-mix(in oklab, var(--card) 70%, transparent);
       color: var(--text);
+      transform: translateY(-1px);
     }
-    .cta{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+
+    .nav-actions{
+      display:flex; align-items:center; gap:10px;
+      min-width: 220px;
+      justify-content:flex-end;
     }
+
     .btn{
-      appearance:none;
-      border:1px solid var(--stroke);
+      border:1px solid color-mix(in oklab, var(--line) 80%, transparent);
+      background: color-mix(in oklab, var(--card) 80%, transparent);
       color: var(--text);
-      background: rgba(255,255,255,.05);
-      padding:10px 14px;
-      border-radius: 999px;
-      font-weight:600;
+      padding:10px 12px;
+      border-radius:12px;
       font-size:13px;
+      font-weight:600;
       cursor:pointer;
-      transition: .18s ease;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
+      transition: transform var(--dur) var(--ease),
+                  background var(--dur) var(--ease),
+                  border var(--dur) var(--ease),
+                  box-shadow var(--dur) var(--ease);
+      display:inline-flex; align-items:center; gap:8px;
       user-select:none;
+      transform: translateZ(0);
     }
-    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.07) }
-    .btn.primary{
-      border-color: transparent;
-      background: linear-gradient(135deg, var(--brand1), var(--brand2));
-      box-shadow: 0 18px 60px rgba(6,182,212,.18);
+    .btn:hover{
+      background: color-mix(in oklab, var(--card2) 85%, transparent);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 28px rgba(0,0,0,.12);
     }
-    .btn.primary:hover{ filter: brightness(1.05) }
-    .dot{
-      width:8px; height:8px; border-radius:999px; background: var(--ok);
-      box-shadow: 0 0 0 4px rgba(34,197,94,.15);
+    .btn:active{ transform: translateY(0px) scale(.99); }
+
+    .btn-primary{
+      border:0;
+      background: linear-gradient(90deg, color-mix(in oklab, var(--accent) 92%, white 8%), color-mix(in oklab, var(--accent2) 92%, white 8%));
+      color: color-mix(in oklab, var(--bg) 30%, #07111f 70%);
+      box-shadow: 0 14px 40px color-mix(in oklab, var(--accent) 18%, transparent),
+                  0 18px 55px color-mix(in oklab, var(--accent2) 18%, transparent);
+    }
+    html[data-theme="light"] .btn-primary{
+      color:#07111f;
+    }
+    .btn-primary:hover{ filter: brightness(1.03); }
+
+    .btn-icon{
+      width:40px; height:40px; padding:0;
+      border-radius: 12px;
+      display:grid; place-items:center;
+    }
+    .theme-ic{
+      width:18px; height:18px; display:block;
     }
 
-    main{
-      margin-top: 20px;
+    /* Sections */
+    section{ padding: 34px 0; }
+    .grid{
       display:grid;
-      grid-template-columns: 1.35fr .9fr;
-      gap: 18px;
+      grid-template-columns: 1.2fr .8fr;
+      gap:18px;
     }
-    @media (max-width: 980px){
-      main{grid-template-columns: 1fr; }
-      header{position:relative; top:0}
-      .brand{min-width:auto}
+    @media (max-width: 920px){
+      .grid{ grid-template-columns: 1fr; }
+      .brand, .nav-actions{ min-width: unset; }
+      .topbar-inner{ flex-wrap:wrap; justify-content:center; }
+      .brand{ justify-content:center; }
+      .nav-actions{ justify-content:center; }
     }
 
-    .panel{
-      border: 1px solid var(--stroke);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    .card{
+      background: linear-gradient(180deg, color-mix(in oklab, var(--card2) 85%, transparent), color-mix(in oklab, var(--card) 70%, transparent));
+      border: 1px solid color-mix(in oklab, var(--line) 80%, transparent);
       border-radius: var(--radius);
-      backdrop-filter: blur(14px);
       box-shadow: var(--shadow);
-      overflow:hidden;
+      padding: 22px;
       position:relative;
+      overflow:hidden;
+      transform: translateZ(0);
     }
-    .panel::before{
+    .card::after{
       content:"";
-      position:absolute; inset:-1px;
-      background: radial-gradient(600px 260px at 20% 0%, rgba(124,58,237,.35), transparent 60%),
-                  radial-gradient(560px 260px at 80% 0%, rgba(6,182,212,.28), transparent 55%);
-      opacity:.7;
+      position:absolute; inset:-2px;
+      background:
+        radial-gradient(600px 220px at 30% 0%, color-mix(in oklab, var(--accent) 16%, transparent), transparent 50%),
+        radial-gradient(520px 240px at 80% 10%, color-mix(in oklab, var(--accent3) 14%, transparent), transparent 55%);
       pointer-events:none;
+      opacity:.9;
+      transition: opacity var(--dur) var(--ease);
     }
-    .panel-inner{ position:relative; padding: 26px; }
+    .card > *{ position:relative; z-index:1; }
+
     .pill{
       display:inline-flex; align-items:center; gap:8px;
-      font-size:12px; padding:7px 12px; border-radius:999px;
-      background: rgba(255,255,255,.06);
-      border:1px solid var(--stroke);
-      color: var(--muted);
+      font-size:12px; color: var(--muted);
+      background: var(--chip-bg);
+      border:1px solid var(--chip-line);
+      border-radius: 999px;
+      padding: 6px 10px;
     }
-    .h1{
-      margin: 16px 0 10px;
-      font-size: 52px;
-      line-height: 1.02;
-      letter-spacing: -1.2px;
+    .dot{
+      width:8px; height:8px; border-radius:999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 16%, transparent);
     }
-    .sub{
-      margin:0;
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.6;
-      max-width: 58ch;
-    }
-    .actions{
-      display:flex; gap:10px; flex-wrap:wrap;
-      margin-top: 18px;
-    }
-    .stats{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 18px;
+
+    .hero-title{
+      margin: 12px 0 10px;
+      font-size: 44px;
+      line-height: 1.04;
+      letter-spacing: -1px;
     }
     @media (max-width: 520px){
-      .h1{font-size:40px}
-      .stats{grid-template-columns:1fr}
+      .hero-title{ font-size: 36px; }
     }
-    .stat{
-      border:1px solid var(--stroke);
-      background: rgba(0,0,0,.12);
-      border-radius: 16px;
-      padding: 14px;
+    .hero-sub{
+      margin:0 0 18px;
+      color: var(--muted);
+      line-height:1.6;
+      max-width: 56ch;
     }
-    .stat small{display:block; color:var(--muted2); font-size:12px}
-    .stat b{display:block; margin-top:4px; font-size:18px}
 
-    .side .panel-inner{ padding: 22px; }
-    .cardline{
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.04);
-      border-radius: 16px;
-      padding: 14px;
-      margin-top:10px;
-      transition:.18s ease;
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+      margin-top: 14px;
     }
-    .cardline:hover{ transform: translateY(-2px); background: rgba(255,255,255,.055) }
-    .cardline b{display:block; font-size:14px}
-    .cardline span{display:block; margin-top:4px; color:var(--muted); font-size:13px; line-height:1.5}
-    .bigbtn{
-      width:100%;
-      margin-top:16px;
-      justify-content:center;
+    @media (max-width: 520px){
+      .kpis{ grid-template-columns: 1fr; }
+    }
+    .kpi{
+      background: color-mix(in oklab, var(--card) 65%, transparent);
+      border: 1px solid color-mix(in oklab, var(--line) 65%, transparent);
+      border-radius: 14px;
       padding: 12px 14px;
-      font-size: 14px;
+      transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
     }
+    .kpi:hover{ transform: translateY(-2px); background: color-mix(in oklab, var(--card2) 75%, transparent); }
+    .kpi .t{ font-size:12px; color: var(--muted2); }
+    .kpi .v{ font-size:18px; font-weight:700; margin-top:4px; }
 
-    section{
-      margin-top: 18px;
+    .list{
+      display:flex; flex-direction:column; gap:10px;
+      margin-top: 10px;
+    }
+    .item{
+      background: color-mix(in oklab, var(--card) 62%, transparent);
+      border: 1px solid color-mix(in oklab, var(--line) 62%, transparent);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display:flex; gap:10px;
+      transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
+    }
+    .item:hover{ transform: translateY(-2px); background: color-mix(in oklab, var(--card2) 72%, transparent); }
+    .item .icon{
+      width:28px; height:28px; border-radius:10px;
+      background: color-mix(in oklab, var(--card2) 75%, transparent);
+      border:1px solid color-mix(in oklab, var(--line) 65%, transparent);
+      display:grid; place-items:center;
+      flex: 0 0 auto;
+    }
+    .item h3{ margin:0; font-size:13px; }
+    .item p{ margin:3px 0 0; font-size:12px; color: var(--muted2); line-height:1.45; }
+
+    /* How it works */
+    .steps{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    @media (max-width: 920px){ .steps{ grid-template-columns: 1fr; } }
+    .step{
+      background: color-mix(in oklab, var(--card) 60%, transparent);
+      border:1px solid color-mix(in oklab, var(--line) 70%, transparent);
+      border-radius: 16px;
+      padding: 14px;
+      transition: transform var(--dur) var(--ease);
+    }
+    .step:hover{ transform: translateY(-2px); }
+    .step .n{
+      width:30px; height:30px; border-radius:10px;
+      display:grid; place-items:center;
+      background: color-mix(in oklab, var(--accent) 18%, transparent);
+      border:1px solid color-mix(in oklab, var(--accent) 28%, transparent);
+      color: var(--text);
+      font-weight:700;
+      margin-bottom: 10px;
+    }
+    .step h4{ margin:0 0 6px; font-size:14px; }
+    .step p{ margin:0; color: var(--muted2); font-size:13px; line-height:1.55; }
+
+    /* Contact */
+    .contact-grid{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 18px;
+      gap:12px;
     }
-    @media (max-width: 980px){
-      section{grid-template-columns:1fr}
+    @media (max-width: 920px){ .contact-grid{ grid-template-columns: 1fr; } }
+    .contact-card{
+      background: color-mix(in oklab, var(--card) 62%, transparent);
+      border:1px solid color-mix(in oklab, var(--line) 70%, transparent);
+      border-radius: 16px;
+      padding: 16px;
+      transition: transform var(--dur) var(--ease);
+    }
+    .contact-card:hover{ transform: translateY(-2px); }
+    .contact-card h3{ margin:0 0 6px; font-size:14px; }
+    .contact-card .line{
+      display:flex; gap:10px; align-items:center;
+      padding:10px 0;
+      border-top:1px solid color-mix(in oklab, var(--line) 55%, transparent);
+    }
+    .contact-card .line:first-of-type{ border-top:0; padding-top:0; }
+    .contact-card .label{ color: var(--muted2); font-size:12px; width: 92px; }
+    .contact-card .value{ font-size:13px; }
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      background: var(--chip-bg);
+      border:1px solid var(--chip-line);
+      color: var(--muted);
+      font-size:12px;
     }
 
-    .sec-title{
-      font-size: 14px;
-      margin: 0 0 10px;
-      color: var(--muted2);
-      letter-spacing:.3px;
-      text-transform: uppercase;
+    footer{
+      padding: 24px 0 40px;
+      color: color-mix(in oklab, var(--muted2) 85%, transparent);
+      font-size:12px;
+      text-align:center;
     }
-    .list{
-      display:grid;
-      gap:10px;
-    }
-    .li{
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.04);
-      border-radius: 16px;
-      padding: 14px;
-    }
-    .li b{display:flex; align-items:center; gap:8px}
-    .tag{
-      font-size:11px; padding:4px 8px;
-      border-radius:999px;
-      border:1px solid var(--stroke);
-      color: var(--muted);
-      background: rgba(255,255,255,.03);
-    }
-    .li p{margin:8px 0 0; color:var(--muted); font-size:13px; line-height:1.6}
 
     /* Modal */
-    .modal{
+    .overlay{
       position:fixed; inset:0;
-      display:none;
-      align-items:center; justify-content:center;
-      padding: 18px;
-      z-index: 50;
-    }
-    .modal.open{ display:flex; }
-    .backdrop{
-      position:absolute; inset:0;
       background: rgba(0,0,0,.55);
       backdrop-filter: blur(10px);
-      animation: fadeIn .16s ease;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 100;
     }
-    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-    .sheet{
-      position:relative;
-      width: min(840px, 100%);
-      border:1px solid var(--stroke);
-      background: rgba(20,24,40,.72);
-      border-radius: 22px;
-      box-shadow: 0 40px 120px rgba(0,0,0,.65);
+    html[data-theme="light"] .overlay{ background: rgba(10,12,18,.35); }
+    .overlay.show{ display:flex; }
+
+    .modal{
+      width: min(760px, 100%);
+      border-radius: 20px;
+      background: linear-gradient(180deg, color-mix(in oklab, var(--card2) 85%, transparent), color-mix(in oklab, var(--card) 70%, transparent));
+      border:1px solid color-mix(in oklab, var(--line) 85%, transparent);
+      box-shadow: 0 24px 80px rgba(0,0,0,.60);
       overflow:hidden;
-      transform: translateY(10px) scale(.99);
-      opacity:0;
-      animation: pop .18s ease forwards;
+      transform: translateY(12px) scale(.985);
+      opacity: 0;
+      transition: transform 240ms var(--ease), opacity 240ms var(--ease);
+      will-change: transform, opacity;
     }
-    @keyframes pop{to{transform:translateY(0) scale(1); opacity:1}}
-    .sheet-head{
-      display:flex; align-items:center; justify-content:space-between;
+    .overlay.show .modal{ transform: translateY(0) scale(1); opacity: 1; }
+
+    .modal-head{
       padding: 14px 16px;
-      border-bottom: 1px solid var(--stroke);
-      background: rgba(255,255,255,.04);
+      display:flex; align-items:center; justify-content:space-between;
+      border-bottom:1px solid color-mix(in oklab, var(--line) 60%, transparent);
     }
-    .sheet-head b{font-size:14px}
+    .modal-head .t{
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .modal-head .t strong{ font-size: 14px; }
+    .modal-head .t span{ font-size: 12px; color: var(--muted2); }
     .x{
-      width:38px; height:38px;
-      border-radius: 12px;
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,.05);
+      width:40px; height:40px;
+      border-radius: 14px;
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-line);
       color: var(--text);
       cursor:pointer;
       display:grid; place-items:center;
-      transition:.15s ease;
+      transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
     }
-    .x:hover{ transform: translateY(-1px); background: rgba(255,255,255,.07) }
+    .x:hover{ background: color-mix(in oklab, var(--chip-bg) 80%, transparent); transform: translateY(-1px); }
 
-    .form{
-      padding: 16px;
+    .modal-body{ padding: 16px; }
+    .form-grid{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap:12px;
     }
-    .form .full{ grid-column: 1 / -1; }
+    @media (max-width: 720px){ .form-grid{ grid-template-columns: 1fr; } }
+
     label{
       display:flex; justify-content:space-between; align-items:center;
-      font-size:12px;
-      color: var(--muted2);
+      font-size: 12px;
+      color: var(--muted);
       margin: 0 0 6px;
     }
-    label em{font-style:normal; color: rgba(234,240,255,.42)}
+    .req{ font-size: 11px; color: var(--muted2); }
+
     input, textarea, select{
       width:100%;
       padding: 12px 12px;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
+      border: 1px solid var(--input-line);
+      background: var(--input-bg);
       color: var(--text);
       outline: none;
-      font-size: 14px;
-      transition: .15s ease;
-    }
-    input:focus, textarea:focus, select:focus{
-      border-color: rgba(6,182,212,.45);
-      box-shadow: 0 0 0 4px rgba(6,182,212,.12);
-    }
-    textarea{ min-height: 140px; resize: vertical; }
-    .form-foot{
-      grid-column: 1 / -1;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap: 12px;
-      padding-top: 4px;
-    }
-    .hint{ font-size:12px; color: var(--muted2); }
-    .statusline{
       font-size: 13px;
+      transition: border var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease), background var(--dur) var(--ease);
+    }
+    textarea{ min-height: 120px; resize: vertical; }
+    input:focus, textarea:focus, select:focus{
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--input-focus) 28%, transparent);
+    }
+
+    /* Category visual alignment */
+    .category-row{
+      display:flex; align-items:center; gap:10px;
+    }
+    .cat-chip{
+      font-size:12px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid color-mix(in oklab, var(--line) 65%, transparent);
+      background: color-mix(in oklab, var(--card) 70%, transparent);
+      color: var(--muted);
+      white-space:nowrap;
+      transition: background var(--dur) var(--ease), color var(--dur) var(--ease), border var(--dur) var(--ease);
+    }
+    .cat-chip strong{ color: var(--text); font-weight:600; }
+
+    /* chip color per category (theme-safe using HSL) */
+    .cat-chip[data-cat="Billing"]{
+      background: color-mix(in oklab, hsla(var(--cat-billing), .16) 80%, transparent);
+      border-color: color-mix(in oklab, hsla(var(--cat-billing), .35) 70%, transparent);
+    }
+    .cat-chip[data-cat="Technical Issue"]{
+      background: color-mix(in oklab, hsla(var(--cat-tech), .14) 80%, transparent);
+      border-color: color-mix(in oklab, hsla(var(--cat-tech), .34) 70%, transparent);
+    }
+    .cat-chip[data-cat="Feature Request"]{
+      background: color-mix(in oklab, hsla(var(--cat-feature), .14) 80%, transparent);
+      border-color: color-mix(in oklab, hsla(var(--cat-feature), .34) 70%, transparent);
+    }
+    .cat-chip[data-cat="Complaint"]{
+      background: color-mix(in oklab, hsla(var(--cat-complaint), .12) 80%, transparent);
+      border-color: color-mix(in oklab, hsla(var(--cat-complaint), .34) 70%, transparent);
+    }
+    .cat-chip[data-cat="General Inquiry"]{
+      background: color-mix(in oklab, hsla(var(--cat-general), .12) 80%, transparent);
+      border-color: color-mix(in oklab, hsla(var(--cat-general), .34) 70%, transparent);
+    }
+
+    .modal-foot{
+      padding: 14px 16px;
+      border-top:1px solid color-mix(in oklab, var(--line) 60%, transparent);
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .helper{
+      color: var(--muted2);
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
+    .msg{
       margin-top: 10px;
+      font-size: 13px;
       min-height: 18px;
     }
-    .ok{ color: var(--ok); }
-    .err{ color: var(--bad); }
-    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas; }
+    .msg.ok{ color: var(--ok); }
+    .msg.err{ color: var(--danger); }
 
-    footer{
-      margin-top: 20px;
-      padding: 16px 18px;
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,.04);
-      border-radius: var(--radius);
-      backdrop-filter: blur(12px);
+    /* Animations: on scroll reveal */
+    .reveal{
+      opacity:0;
+      transform: translateY(10px);
+      transition: opacity 600ms var(--ease), transform 600ms var(--ease);
     }
-    footer .grid{
-      display:grid;
-      grid-template-columns: 1.2fr .8fr;
-      gap: 14px;
+    .reveal.show{
+      opacity:1;
+      transform: translateY(0);
     }
-    @media (max-width: 980px){
-      footer .grid{grid-template-columns:1fr}
+
+    /* Error shake */
+    .shake{
+      animation: shake 420ms var(--ease);
     }
-    .contact a{ color: var(--text); text-decoration:none; border-bottom: 1px dashed rgba(255,255,255,.25); }
-    .contact a:hover{ border-bottom-color: rgba(255,255,255,.55); }
-    .fine{ color: var(--muted2); font-size: 12px; line-height:1.6 }
+    @keyframes shake{
+      0%,100%{ transform: translateX(0); }
+      20%{ transform: translateX(-6px); }
+      40%{ transform: translateX(6px); }
+      60%{ transform: translateX(-4px); }
+      80%{ transform: translateX(4px); }
+    }
+
+    /* Loading shimmer for button */
+    .loading{
+      position:relative;
+      overflow:hidden;
+      pointer-events:none;
+      opacity:.92;
+    }
+    .loading::after{
+      content:"";
+      position:absolute; inset:-40% -60%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+      transform: rotate(18deg) translateX(-40%);
+      animation: shimmer 900ms infinite;
+    }
+    @keyframes shimmer{
+      0%{ transform: rotate(18deg) translateX(-40%); }
+      100%{ transform: rotate(18deg) translateX(120%); }
+    }
+
+    /* Prefer reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .logo::after{ animation:none; }
+      .reveal, .reveal.show{ transition:none; transform:none; opacity:1; }
+      .modal{ transition:none; }
+      .btn, .nav a, .kpi, .item, .step, .contact-card{ transition:none; }
+      .loading::after{ animation:none; }
+    }
   </style>
 </head>
 
 <body>
   <div class="noise"></div>
 
-  <div class="wrap">
-    <header>
+  <div class="topbar">
+    <div class="topbar-inner">
       <div class="brand">
-        <div class="logo"></div>
+        <div class="logo" aria-hidden="true"></div>
         <div>
-          <b>Support Desk</b>
-          <span>Activepieces Automation Demo</span>
+          <h1>Support Desk</h1>
+          <p>Activepieces Ticket Portal</p>
         </div>
       </div>
 
-      <nav>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="#home">Home</a>
         <a href="#how">How it works</a>
-        <a href="#features">Features</a>
         <a href="#contact">Contact</a>
       </nav>
 
-      <div class="cta">
-        <span class="pill"><span class="dot"></span> Live webhook</span>
-        <button class="btn primary" onclick="openModal()">Create Ticket</button>
+      <div class="nav-actions">
+        <button class="btn btn-icon" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">
+          <svg class="theme-ic" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 3a1 1 0 0 1 1 1v1.2a1 1 0 1 1-2 0V4a1 1 0 0 1 1-1Zm0 16.8a1 1 0 0 1 1 1V22a1 1 0 1 1-2 0v-1.2a1 1 0 0 1 1-1ZM3 12a1 1 0 0 1 1-1h1.2a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1Zm16.8 0a1 1 0 0 1 1-1H22a1 1 0 1 1 0 2h-1.2a1 1 0 0 1-1-1ZM6.1 6.1a1 1 0 0 1 1.4 0l.85.85a1 1 0 0 1-1.42 1.42l-.83-.85a1 1 0 0 1 0-1.42Zm10.6 10.6a1 1 0 0 1 1.4 0l.85.85a1 1 0 1 1-1.42 1.42l-.83-.85a1 1 0 0 1 0-1.42ZM17.9 6.1a1 1 0 0 1 0 1.4l-.85.85a1 1 0 0 1-1.42-1.42l.85-.83a1 1 0 0 1 1.42 0ZM7.95 15.65a1 1 0 0 1 0 1.4l-.85.85a1 1 0 0 1-1.42-1.42l.85-.83a1 1 0 0 1 1.42 0ZM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z" fill="currentColor"/>
+          </svg>
+        </button>
+        <button class="btn" onclick="scrollToHow()">How it works</button>
+        <button class="btn btn-primary" onclick="openModal()">Create Ticket</button>
       </div>
-    </header>
+    </div>
+  </div>
 
-    <main>
-      <div class="panel">
-        <div class="panel-inner">
-          <span class="pill">Customer Support Tickets • Automation-first</span>
-          <div class="h1">Premium support portal.<br/>Powered by Activepieces.</div>
-          <p class="sub">
-            This website demonstrates a complete ticket workflow: validation, routing, AI assistance,
-            and delivery to an Activepieces flow via webhook — with clean UX and professional UI interactions.
+  <main class="container">
+    <!-- HERO -->
+    <section id="home" class="reveal">
+      <div class="grid">
+        <div class="card">
+          <span class="pill"><span class="dot"></span> Customer Support Tickets</span>
+          <h2 class="hero-title">Submit support tickets<br/>the professional way.</h2>
+          <p class="hero-sub">
+            Task-based demo: user submits a ticket → processed by <strong>Activepieces</strong> → saved to Google Sheets → triaged automatically.
           </p>
 
-          <div class="actions">
-            <button class="btn primary" onclick="openModal()">✨ Create Ticket</button>
-            <a class="btn" href="#how">See how it works</a>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="openModal()">Create Ticket</button>
+            <button class="btn" onclick="scrollToHow()">See workflow</button>
           </div>
 
-          <div class="stats">
-            <div class="stat">
-              <small>Response SLA</small>
-              <b>Automated</b>
+          <div class="kpis">
+            <div class="kpi">
+              <div class="t">Routing</div>
+              <div class="v">Automated</div>
             </div>
-            <div class="stat">
-              <small>Routing</small>
-              <b>Smart</b>
+            <div class="kpi">
+              <div class="t">Storage</div>
+              <div class="v">Google Sheets</div>
             </div>
-            <div class="stat">
-              <small>Delivery</small>
-              <b>Instant</b>
+            <div class="kpi">
+              <div class="t">Delivery</div>
+              <div class="v">Webhook</div>
             </div>
+          </div>
+
+          <div style="margin-top:14px; color:var(--muted2); font-size:12px;">
+            Tip: toggle Light/Dark to see how the UI adapts for comfort.
           </div>
         </div>
-      </div>
 
-      <div class="panel side">
-        <div class="panel-inner">
-          <div class="sec-title">What you’ll get</div>
+        <div class="card">
+          <span class="pill">What you’ll get</span>
 
-          <div class="cardline">
-            <b>Luxury UI interactions <span class="tag">Micro-animations</span></b>
-            <span>Modern glass UI, smooth modal, proper loading states, and clean form UX.</span>
-          </div>
-
-          <div class="cardline">
-            <b>Clean validations <span class="tag">No nonsense</span></b>
-            <span>Real-time feedback and professional error messages.</span>
-          </div>
-
-          <div class="cardline">
-            <b>Direct webhook delivery <span class="tag">Activepieces</span></b>
-            <span>Tickets go straight into your Activepieces flow and get an AI-based reply.</span>
-          </div>
-
-          <button class="btn primary bigbtn" onclick="openModal()">Open Ticket Form →</button>
-        </div>
-      </div>
-    </main>
-
-    <section id="how">
-      <div class="panel">
-        <div class="panel-inner">
-          <div class="sec-title">How it works</div>
           <div class="list">
-            <div class="li">
-              <b>1) User submits a ticket <span class="tag">Frontend</span></b>
-              <p>Data is validated in the browser, then sent as JSON to an Activepieces webhook.</p>
+            <div class="item">
+              <div class="icon">✦</div>
+              <div>
+                <h3>Theme-aligned colors</h3>
+                <p>Category colors adapt to Light/Dark mode for consistent comfort.</p>
+              </div>
             </div>
-            <div class="li">
-              <b>2) Automation & AI routing <span class="tag">Activepieces</span></b>
-              <p>Flow categorizes, assigns priority, generates notes, SLA deadline, and auto-reply.</p>
+            <div class="item">
+              <div class="icon">✓</div>
+              <div>
+                <h3>Polished micro-animations</h3>
+                <p>Subtle motion, focus states, and a smooth modal experience.</p>
+              </div>
             </div>
-            <div class="li">
-              <b>3) Stored & tracked <span class="tag">Sheets</span></b>
-              <p>Results are stored in Google Sheets for support operations and reporting.</p>
+            <div class="item">
+              <div class="icon">↯</div>
+              <div>
+                <h3>Direct webhook delivery</h3>
+                <p>Tickets go straight to Activepieces automation instantly.</p>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div class="panel" id="features">
-        <div class="panel-inner">
-          <div class="sec-title">Features</div>
-          <div class="list">
-            <div class="li">
-              <b>Ticket ID shown to user <span class="tag mono">hash</span></b>
-              <p>After submit, the portal displays a ticket id (returned by the automation).</p>
-            </div>
-            <div class="li">
-              <b>AI Auto-reply <span class="tag">LLM</span></b>
-              <p>Displays AI response message in a professional confirmation view.</p>
-            </div>
-            <div class="li">
-              <b>Professional contact section <span class="tag">Portfolio</span></b>
-              <p>Clear identity + links: LinkedIn, Instagram, phone, and email.</p>
-            </div>
+          <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+            <span class="badge">Fast</span>
+            <span class="badge">Professional</span>
+            <span class="badge">Organized</span>
           </div>
         </div>
       </div>
     </section>
 
-    <footer id="contact">
-      <div class="grid">
-        <div>
-          <div class="sec-title">About this demo</div>
-          <div class="fine">
-            This is a portfolio-grade support ticket portal built for demonstrating workflow automation with
-            <b>Activepieces</b>. The UI focuses on clean UX, professional design choices, and clear system behavior.
-          </div>
-        </div>
+    <!-- HOW -->
+    <section id="how" class="reveal">
+      <div class="card">
+        <span class="pill">How it works</span>
+        <h3 style="margin:10px 0 14px; font-size:18px;">Activepieces automation workflow</h3>
 
-        <div class="contact">
-          <div class="sec-title">Contact</div>
-          <div class="fine">
-            Phone (KSA): <a href="tel:+966596624652">+966596624652</a><br/>
-            Phone (JO): <a href="tel:+962798343107">+962798343107</a><br/>
-            LinkedIn: <a href="https://sa.linkedin.com/in/alihuzain" target="_blank" rel="noreferrer">sa.linkedin.com/in/alihuzain</a><br/>
-            Instagram: <a href="https://instagram.com/alihuzain1" target="_blank" rel="noreferrer">@alihuzain1</a><br/>
-            Email: <a href="mailto:Alihuzayen22@gmail.com">Alihuzayen22@gmail.com</a>
+        <div class="steps">
+          <div class="step">
+            <div class="n">1</div>
+            <h4>Submit ticket</h4>
+            <p>User fills the form → website sends a JSON payload to your Activepieces webhook.</p>
+          </div>
+          <div class="step">
+            <div class="n">2</div>
+            <h4>Triaging</h4>
+            <p>Activepieces runs LLM + calculations (priority, risk, SLA deadline, auto-reply).</p>
+          </div>
+          <div class="step">
+            <div class="n">3</div>
+            <h4>Save & track</h4>
+            <p>Ticket is stored in Google Sheets with hash + duplicate logic for reliability.</p>
           </div>
         </div>
       </div>
-    </footer>
-  </div>
+    </section>
 
-  <!-- Modal -->
-  <div class="modal" id="modal">
-    <div class="backdrop" onclick="closeModal()"></div>
-    <div class="sheet" role="dialog" aria-modal="true" aria-label="New Support Ticket">
-      <div class="sheet-head">
-        <b>New Support Ticket</b>
+    <!-- CONTACT -->
+    <section id="contact" class="reveal">
+      <div class="card">
+        <span class="pill">Contact</span>
+        <h3 style="margin:10px 0 14px; font-size:18px;">Reach me</h3>
+
+        <div class="contact-grid">
+          <div class="contact-card">
+            <h3>Direct</h3>
+            <div class="line">
+              <div class="label">KSA</div>
+              <div class="value"><a href="tel:+966596624652">+966 59 662 4652</a></div>
+            </div>
+            <div class="line">
+              <div class="label">Jordan</div>
+              <div class="value"><a href="tel:+962798343107">+962 79 834 3107</a></div>
+            </div>
+            <div class="line">
+              <div class="label">Gmail</div>
+              <div class="value"><a href="mailto:alihuzayen22@gmail.com">alihuzayen22@gmail.com</a></div>
+            </div>
+          </div>
+
+          <div class="contact-card">
+            <h3>Social</h3>
+            <div class="line">
+              <div class="label">LinkedIn</div>
+              <div class="value"><a target="_blank" rel="noopener" href="https://sa.linkedin.com/in/alihuzain">sa.linkedin.com/in/alihuzain</a></div>
+            </div>
+            <div class="line">
+              <div class="label">Instagram</div>
+              <div class="value"><a target="_blank" rel="noopener" href="https://instagram.com/alihuzain1">instagram.com/alihuzain1</a></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px; color:var(--muted2); font-size:12px;">
+          This portal demonstrates a real automation pipeline using Activepieces.
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      © <span id="year"></span> — Support Desk • Built with Activepieces automation
+    </footer>
+  </main>
+
+  <!-- MODAL -->
+  <div class="overlay" id="overlay" onclick="overlayClick(event)">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <div class="t">
+          <strong id="modalTitle">New Support Ticket</strong>
+          <span>Sent to Activepieces webhook as JSON.</span>
+        </div>
         <button class="x" onclick="closeModal()" aria-label="Close">✕</button>
       </div>
 
-      <div class="form">
-        <div>
-          <label>Your Name <em>required</em></label>
-          <input id="name" placeholder="e.g. Ali Huzain" />
-        </div>
-        <div>
-          <label>Your Email <em>required</em></label>
-          <input id="email" placeholder="e.g. ali@email.com" />
+      <div class="modal-body">
+        <div class="form-grid">
+          <div>
+            <label>Your Name <span class="req">required</span></label>
+            <input id="name" placeholder="e.g. John Doe" autocomplete="name" />
+          </div>
+          <div>
+            <label>Your Email <span class="req">required</span></label>
+            <input id="email" placeholder="e.g. example@email.com" autocomplete="email" />
+          </div>
         </div>
 
-        <div class="full">
-          <label>Subject <em>required</em></label>
+        <div style="margin-top:12px;">
+          <label>Subject <span class="req">required</span></label>
           <input id="subject" placeholder="Short summary" />
         </div>
 
-        <div class="full">
-          <label>Message <em>required</em></label>
+        <div style="margin-top:12px;">
+          <label>Message <span class="req">required</span></label>
           <textarea id="message" placeholder="Describe your issue..."></textarea>
         </div>
 
-        <div class="full">
-          <label>Category <em>required</em></label>
-          <select id="category">
-            <option>Billing</option>
-            <option>Technical Issue</option>
-            <option>Feature Request</option>
-            <option>Complaint</option>
-            <option>General Inquiry</option>
-          </select>
+        <div style="margin-top:12px;">
+          <label>Category <span class="req">required</span></label>
+          <div class="category-row">
+            <select id="category" onchange="syncCategoryChip()">
+              <option>Billing</option>
+              <option>Technical Issue</option>
+              <option>Feature Request</option>
+              <option>Complaint</option>
+              <option>General Inquiry</option>
+            </select>
+            <div class="cat-chip" id="catChip" data-cat="Billing">
+              <strong>Billing</strong>
+            </div>
+          </div>
         </div>
 
-        <div class="form-foot">
-          <div class="hint">Sent securely to Activepieces webhook → routed & stored in Sheets.</div>
-          <button class="btn primary" id="btn" onclick="sendTicket()">Send Ticket</button>
-        </div>
+        <div class="msg" id="msg"></div>
+        <div style="margin-top:8px; color:var(--muted2); font-size:12px;" id="ticketMeta"></div>
+      </div>
 
-        <div class="full">
-          <div class="statusline" id="msg"></div>
-          <div class="fine" id="meta"></div>
+      <div class="modal-foot">
+        <div class="helper">
+          We’ll review your request and respond as soon as possible.
         </div>
+        <button class="btn btn-primary" id="btn" onclick="sendTicket()">Send Ticket</button>
       </div>
     </div>
   </div>
 
   <script>
-    // ✅ PUT YOUR REAL WEBHOOK HERE
-    const WEBHOOK_URL = "PASTE_YOUR_ACTIVEPIECES_WEBHOOK_URL_HERE";
+    const WEBHOOK_URL = "https://cloud.activepieces.com/api/v1/webhooks/UnLMXk61h1UlcIWNTo5VT";
 
-    const modal = document.getElementById("modal");
+    const overlay = document.getElementById("overlay");
     const msg = document.getElementById("msg");
-    const meta = document.getElementById("meta");
     const btn = document.getElementById("btn");
+    const meta = document.getElementById("ticketMeta");
+    const catChip = document.getElementById("catChip");
+    const root = document.documentElement;
 
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // -----------------
+    // THEME TOGGLE
+    // -----------------
+    const savedTheme = localStorage.getItem("theme");
+    if(savedTheme === "light" || savedTheme === "dark"){
+      root.setAttribute("data-theme", savedTheme);
+    }else{
+      // default: match system
+      const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+      root.setAttribute("data-theme", prefersLight ? "light" : "dark");
+    }
+
+    document.getElementById("themeBtn").addEventListener("click", () => {
+      const current = root.getAttribute("data-theme") || "dark";
+      const next = current === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      localStorage.setItem("theme", next);
+    });
+
+    // -----------------
+    // SCROLL REVEAL
+    // -----------------
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          e.target.classList.add("show");
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+    // -----------------
+    // MODAL
+    // -----------------
     function openModal(){
       msg.textContent = "";
       meta.textContent = "";
-      msg.className = "statusline";
-      modal.classList.add("open");
-      setTimeout(()=> document.getElementById("name").focus(), 80);
+      msg.className = "msg";
+      overlay.classList.add("show");
+      syncCategoryChip();
+      setTimeout(()=> document.getElementById("name").focus(), 70);
+      document.addEventListener("keydown", escClose);
     }
+
     function closeModal(){
-      modal.classList.remove("open");
+      overlay.classList.remove("show");
+      document.removeEventListener("keydown", escClose);
     }
-    window.addEventListener("keydown", (e)=>{
+
+    function escClose(e){
       if(e.key === "Escape") closeModal();
-    });
+    }
 
-    function isEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+    function overlayClick(e){
+      if(e.target === overlay) closeModal();
+    }
 
+    function scrollToHow(){
+      document.getElementById("how").scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    // -----------------
+    // CATEGORY CHIP
+    // -----------------
+    function syncCategoryChip(){
+      const val = document.getElementById("category").value;
+      catChip.setAttribute("data-cat", val);
+      catChip.innerHTML = "<strong>" + val + "</strong>";
+    }
+
+    // -----------------
+    // VALIDATION
+    // -----------------
+    function isEmail(v){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    }
+
+    function shake(el){
+      el.classList.remove("shake");
+      void el.offsetWidth; // reflow
+      el.classList.add("shake");
+    }
+
+    // -----------------
+    // SEND TICKET
+    // -----------------
     async function sendTicket(){
       msg.textContent = "";
       meta.textContent = "";
-      msg.className = "statusline";
+      msg.className = "msg";
 
       const data = {
         name: document.getElementById("name").value.trim(),
@@ -630,22 +959,26 @@
       if(!data.name || !data.email || !data.subject || !data.message){
         msg.textContent = "Please fill all required fields.";
         msg.classList.add("err");
+        shake(document.querySelector(".modal"));
         return;
       }
       if(!isEmail(data.email)){
         msg.textContent = "Please enter a valid email address.";
         msg.classList.add("err");
+        shake(document.getElementById("email"));
         return;
       }
-      if(!WEBHOOK_URL || WEBHOOK_URL.includes("PASTE_YOUR_ACTIVEPIECES_WEBHOOK_URL_HERE")){
+      if(!WEBHOOK_URL || WEBHOOK_URL.includes("https://cloud.activepieces.com/api/v1/webhooks/UnLMXk61h1UlcIWNTo5VT")){
         msg.textContent = "Webhook URL is not set yet.";
         msg.classList.add("err");
+        shake(btn);
         return;
       }
 
       try{
         btn.disabled = true;
-        btn.textContent = "Sending…";
+        btn.classList.add("loading");
+        btn.textContent = "Sending...";
 
         const res = await fetch(WEBHOOK_URL, {
           method: "POST",
@@ -655,34 +988,47 @@
 
         if(!res.ok) throw new Error("Request failed");
 
-        // If Activepieces returns JSON, show it nicely
+        // try to read JSON response (optional)
         let payload = null;
         try { payload = await res.json(); } catch {}
 
-        msg.textContent = "✅ Ticket sent successfully!";
+        const ticketId =
+          payload?.ticket_id ||
+          payload?.ticketId ||
+          payload?.id ||
+          (payload?.ticket_hash ? String(payload.ticket_hash).slice(0, 12) : "");
+
+        msg.textContent = "✅ Ticket sent successfully.";
         msg.classList.add("ok");
 
-        // Optional UI: show ticket id + reply if present
-        const ticketId = payload?.ticket_id || payload?.ticketId || payload?.id || payload?.ticket_hash?.slice?.(0,12);
-        const reply = payload?.auto_reply || payload?.autoReply || payload?.reply;
-
-        let info = [];
-        if(ticketId) info.push(`Ticket ID: <span class="mono">${ticketId}</span>`);
-        if(reply) info.push(`AI reply: “${String(reply).slice(0,220)}${String(reply).length>220?"…":""}”`);
-        meta.innerHTML = info.length ? info.join("<br/>") : "";
+        if(ticketId){
+          meta.innerHTML = `Ticket ID: <strong style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas;">${ticketId}</strong>`;
+        }
 
         // reset
         document.getElementById("subject").value = "";
         document.getElementById("message").value = "";
         document.getElementById("category").value = "Billing";
+        syncCategoryChip();
+
       }catch(e){
         msg.textContent = "❌ Failed to send. Please try again.";
         msg.classList.add("err");
+        shake(document.querySelector(".modal"));
       }finally{
         btn.disabled = false;
+        btn.classList.remove("loading");
         btn.textContent = "Send Ticket";
       }
     }
+
+    // expose to inline handlers
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+    window.overlayClick = overlayClick;
+    window.scrollToHow = scrollToHow;
+    window.sendTicket = sendTicket;
+    window.syncCategoryChip = syncCategoryChip;
   </script>
 </body>
 </html>
