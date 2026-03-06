@@ -1113,16 +1113,20 @@
         msg.classList.add("err");
         return;
       }
+      
       if(!isEmail(data.email)){
         msg.textContent = "Please enter a valid email address.";
         msg.classList.add("err");
         return;
       }
-      if(!WEBHOOK_URL || WEBHOOK_URL.includes("https://cloud.activepieces.com/api/v1/webhooks/UnLMXk61h1UlcIWNTo5VT")){
-        msg.textContent = "Webhook URL is not set yet.";
+      
+      console.log("WEBHOOK_URL =", WEBHOOK_URL);
+      if(!WEBHOOK_URL){
+        msg.textContent = "Webhook is empty.";
         msg.classList.add("err");
-        return;
+      return;
       }
+      
 
       try{
         btn.disabled = true;
