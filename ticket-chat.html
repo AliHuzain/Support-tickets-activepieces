@@ -6,21 +6,20 @@
 <title>Ticket Chat</title>
 
 <style>
+
 *{box-sizing:border-box;}
 
 body{
 margin:0;
-font-family:Inter,Arial,sans-serif;
+font-family:Inter,Arial;
 background:#0b1020;
 color:white;
-min-height:100vh;
 }
 
 .page{
-min-height:100vh;
 display:flex;
 justify-content:center;
-padding:14px;
+min-height:100vh;
 }
 
 .chat-shell{
@@ -72,7 +71,6 @@ border-radius:16px;
 font-size:13px;
 line-height:1.5;
 word-break:break-word;
-white-space:pre-wrap;
 }
 
 .customer{
@@ -89,32 +87,12 @@ background:linear-gradient(135deg,#4f46e5,#6d28d9);
 font-size:11px;
 opacity:.8;
 margin-bottom:6px;
-font-weight:700;
 }
 
 .bubble-time{
 font-size:10px;
 opacity:.6;
 margin-top:6px;
-}
-
-.loading,.not-found{
-text-align:center;
-padding:28px 14px;
-color:#94a3b8;
-font-size:13px;
-}
-
-.closed-box{
-margin-top:10px;
-background:rgba(239,68,68,.12);
-border:1px solid rgba(239,68,68,.28);
-color:#fecaca;
-padding:12px 13px;
-border-radius:14px;
-font-weight:700;
-line-height:1.5;
-font-size:12px;
 }
 
 .reply-box{
@@ -136,7 +114,6 @@ color:white;
 padding:12px 90px 12px 12px;
 font-size:13px;
 resize:none;
-min-height:78px;
 }
 
 .send-btn{
@@ -150,11 +127,6 @@ color:white;
 padding:8px 16px;
 font-weight:700;
 cursor:pointer;
-}
-
-.send-btn:disabled{
-opacity:.6;
-cursor:not-allowed;
 }
 
 .actions{
@@ -185,13 +157,6 @@ cursor:pointer;
 font-size:12px;
 }
 
-.notice{
-margin-top:10px;
-font-size:12px;
-color:#cbd5e1;
-line-height:1.5;
-}
-
 .footer{
 text-align:center;
 font-size:11px;
@@ -205,283 +170,216 @@ color:#94a3b8;
 <body>
 
 <div class="page">
+
 <div class="chat-shell">
 
 <div class="topbar">
 <h1>Support Ticket</h1>
+
 <div class="topbar-meta">
 <div class="badge" id="ticketIdBadge">Ticket: --</div>
 <div class="badge" id="statusBadge">Status: --</div>
 </div>
+
 </div>
 
-<div class="messages-wrap">
-<div id="loading" class="loading">Loading ticket...</div>
-<div id="notFound" class="not-found" style="display:none;">Ticket not found.</div>
-<div id="chatList" style="display:flex;flex-direction:column;gap:10px;"></div>
-<div id="closedBox" class="closed-box" style="display:none;">This ticket is closed. You can no longer send messages.</div>
-</div>
+<div class="messages-wrap" id="chatList"></div>
 
-<div id="replyBox" class="reply-box" style="display:none;">
+<div class="reply-box">
+
 <div class="composer">
+
 <textarea id="replyMessage" placeholder="Write your message here..."></textarea>
+
 <button class="send-btn" id="sendBtn">Send</button>
+
 </div>
 
 <div class="actions">
+
 <label class="file-label" for="fileInput">Attach files</label>
 <input type="file" id="fileInput" class="file-input" multiple>
+
 <button class="btn" id="refreshBtn">Refresh</button>
+
 </div>
 
-<div id="fileNames" class="notice"></div>
-<div id="replyNotice" class="notice"></div>
 </div>
 
-<div class="footer">Keep this link private</div>
+<div class="footer">
+Keep this link private
+</div>
 
 </div>
 </div>
 
 <script>
-const TICKETS_CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7DzUBQu_foss2Q28P_aEEyWHA7k7-dpKOlJtXS-7Sgm0AXlB6zklULk4CXp77CRX1G8IBqTnQ6avP/pub?output=csv";
-const REPLIES_CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7DzUBQu_foss2Q28P_aEEyWHA7k7-dpKOlJtXS-7Sgm0AXlB6zklULk4CXp77CRX1G8IBqTnQ6avP/pub?gid=415288267&single=true&output=csv";
-const REPLY_WEBHOOK_URL="https://cloud.activepieces.com/api/v1/webhooks/OsdvEzv3yCnuL4Oe7wyZJ";
 
-const params=new URLSearchParams(window.location.search);
-const ticketId=params.get("ticket");
+const SHEET_CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7DzUBQu_foss2Q28P_aEEyWHA7k7-dpKOlJtXS-7Sgm0AXlB6zklULk4CXp77CRX1G8IBqTnQ6avP/pub?output=csv"
 
-const ticketIdBadge=document.getElementById("ticketIdBadge");
-const statusBadge=document.getElementById("statusBadge");
-const loading=document.getElementById("loading");
-const notFound=document.getElementById("notFound");
-const chatList=document.getElementById("chatList");
-const closedBox=document.getElementById("closedBox");
-const replyBox=document.getElementById("replyBox");
-const replyMessage=document.getElementById("replyMessage");
-const sendBtn=document.getElementById("sendBtn");
-const refreshBtn=document.getElementById("refreshBtn");
-const replyNotice=document.getElementById("replyNotice");
-const fileInput=document.getElementById("fileInput");
-const fileNames=document.getElementById("fileNames");
+const REPLY_WEBHOOK_URL = "https://cloud.activepieces.com/api/v1/webhooks/OsdvEzv3yCnuL4Oe7wyZJ";
+  
+const params=new URLSearchParams(window.location.search)
+const ticketId=params.get("ticket")
 
-let currentTicket=null;
+const chatList=document.getElementById("chatList")
+const ticketIdBadge=document.getElementById("ticketIdBadge")
+const statusBadge=document.getElementById("statusBadge")
+const sendBtn=document.getElementById("sendBtn")
+const replyMessage=document.getElementById("replyMessage")
+const refreshBtn=document.getElementById("refreshBtn")
+
+let currentTicket=null
 
 function parseCSV(text){
-  const rows=[];
-  let row=[];
-  let current="";
-  let inQuotes=false;
 
-  for(let i=0;i<text.length;i++){
-    const char=text[i];
-    const next=text[i+1];
+const rows=[]
+let row=[]
+let current=""
+let inQuotes=false
 
-    if(char=='"'){
-      if(inQuotes && next=='"'){
-        current+='"';
-        i++;
-      }else{
-        inQuotes=!inQuotes;
-      }
-    }else if(char==="," && !inQuotes){
-      row.push(current);
-      current="";
-    }else if((char==="\n"||char==="\r")&&!inQuotes){
-      if(char==="\r" && next==="\n") i++;
-      row.push(current);
-      rows.push(row);
-      row=[];
-      current="";
-    }else{
-      current+=char;
-    }
-  }
+for(let i=0;i<text.length;i++){
 
-  if(current.length>0 || row.length>0){
-    row.push(current);
-    rows.push(row);
-  }
+const char=text[i]
+const next=text[i+1]
 
-  return rows.filter(r=>r.some(cell=>String(cell).trim()!==""));
+if(char=='"'){
+
+if(inQuotes && next=='"'){
+current+='"'
+i++
+}else{
+inQuotes=!inQuotes
+}
+
+}else if(char=="," && !inQuotes){
+
+row.push(current)
+current=""
+
+}else if((char=="\n"||char=="\r")&&!inQuotes){
+
+row.push(current)
+rows.push(row)
+row=[]
+current=""
+
+}else{
+
+current+=char
+
+}
+
+}
+
+row.push(current)
+rows.push(row)
+
+return rows
+
 }
 
 function rowsToObjects(rows){
-  const headers=rows[0].map(h=>String(h).trim());
-  return rows.slice(1).map(row=>{
-    const obj={};
-    headers.forEach((header,index)=>{
-      obj[header]=String(row[index]||"").trim();
-    });
-    return obj;
-  });
+
+const headers=rows[0]
+
+return rows.slice(1).map(row=>{
+
+const obj={}
+
+headers.forEach((h,i)=>{
+obj[h]=row[i]
+})
+
+return obj
+
+})
+
 }
 
-function esc(str){
-  return String(str||"")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
+function renderTicket(ticket){
+
+currentTicket=ticket
+
+ticketIdBadge.textContent="Ticket: "+ticket.ticket_id
+statusBadge.textContent="Status: "+ticket.status
+
+const messages=[]
+
+if(ticket.message){
+
+messages.push({
+sender:ticket.name,
+type:"customer",
+text:ticket.message,
+time:ticket.response_deadline
+})
+
 }
 
-function renderStatus(status){
-  const s=String(status||"").toUpperCase();
-  statusBadge.textContent="Status: "+(s||"--");
+if(ticket.auto_reply){
+
+messages.push({
+sender:"Support Team",
+type:"support",
+text:ticket.auto_reply,
+time:""
+})
+
 }
 
-function renderMessages(ticket,replies){
-  const messages=[];
+chatList.innerHTML=messages.map(msg=>`
 
-  if(ticket.message){
-    messages.push({
-      sender: ticket.name || "You",
-      type: "customer",
-      text: ticket.message,
-      time: ticket.response_deadline || ""
-    });
-  }
+<div class="bubble ${msg.type}">
+<div class="bubble-header">${msg.sender}</div>
+<div>${msg.text}</div>
+<div class="bubble-time">${msg.time||""}</div>
+</div>
 
-  if(ticket.auto_reply){
-    messages.push({
-      sender: "Support Team",
-      type: "support",
-      text: ticket.auto_reply,
-      time: ""
-    });
-  }
+`).join("")
 
-  replies.forEach(r=>{
-    messages.push({
-      sender: r.sender === "support" ? "Support Team" : (ticket.name || "You"),
-      type: r.sender === "support" ? "support" : "customer",
-      text: r.message || "",
-      time: r.time || ""
-    });
-  });
+chatList.scrollTop=chatList.scrollHeight
 
-  chatList.innerHTML=messages.map(m=>`
-    <div class="bubble ${m.type}">
-      <div class="bubble-header">${esc(m.sender)}</div>
-      <div>${esc(m.text)}</div>
-      <div class="bubble-time">${esc(m.time||"")}</div>
-    </div>
-  `).join("");
-
-  chatList.scrollTop=chatList.scrollHeight;
 }
 
 async function loadTicket(){
-  loading.style.display="block";
-  notFound.style.display="none";
-  chatList.innerHTML="";
-  closedBox.style.display="none";
-  replyBox.style.display="none";
-  replyNotice.textContent="";
 
-  if(!ticketId){
-    loading.style.display="none";
-    notFound.style.display="block";
-    return;
-  }
+const res=await fetch(SHEET_CSV_URL+"&t="+Date.now())
+const text=await res.text()
 
-  try{
-    const [ticketRes,repliesRes]=await Promise.all([
-      fetch(TICKETS_CSV_URL+"&t="+Date.now()),
-      fetch(REPLIES_CSV_URL+"&t="+Date.now())
-    ]);
+const rows=parseCSV(text)
+const data=rowsToObjects(rows)
 
-    const ticketRows=parseCSV(await ticketRes.text());
-    const repliesRows=parseCSV(await repliesRes.text());
+const ticket=data.find(t=>t.ticket_id==ticketId)
 
-    const tickets=rowsToObjects(ticketRows);
-    const replies=rowsToObjects(repliesRows);
+if(ticket) renderTicket(ticket)
 
-    const ticket=tickets.find(t=>String(t.ticket_id).trim()===String(ticketId).trim());
-
-    if(!ticket){
-      loading.style.display="none";
-      notFound.style.display="block";
-      return;
-    }
-
-    currentTicket=ticket;
-    ticketIdBadge.textContent="Ticket: "+ticket.ticket_id;
-    renderStatus(ticket.status);
-
-    const relatedReplies=replies.filter(r=>String(r.ticket_id).trim()===String(ticket.ticket_id).trim());
-
-    renderMessages(ticket,relatedReplies);
-
-    loading.style.display="none";
-
-    if(String(ticket.status||"").toUpperCase()==="CLOSED"){
-      closedBox.style.display="block";
-      replyBox.style.display="none";
-    }else{
-      replyBox.style.display="block";
-    }
-
-  }catch(e){
-    loading.style.display="none";
-    notFound.style.display="block";
-  }
 }
-
-fileInput.addEventListener("change",()=>{
-  const files=Array.from(fileInput.files||[]);
-  fileNames.textContent=files.length ? "Selected files: "+files.map(f=>f.name).join(", ") : "";
-});
 
 async function sendReply(){
-  const message=replyMessage.value.trim();
 
-  if(!message){
-    replyNotice.textContent="Please write a message first.";
-    return;
-  }
+const message=replyMessage.value.trim()
 
-  if(!currentTicket){
-    replyNotice.textContent="Ticket not loaded.";
-    return;
-  }
+if(!message) return
 
-  sendBtn.disabled=true;
-  replyNotice.textContent="Sending...";
+await fetch(REPLY_WEBHOOK_URL,{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+ticket_id:currentTicket.ticket_id,
+message:message
+})
+})
 
-  try{
-    const response=await fetch(REPLY_WEBHOOK_URL,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        ticket_id: currentTicket.ticket_id,
-        name: currentTicket.name,
-        email: currentTicket.email,
-        reply: message,
-        sender: "customer"
-      })
-    });
+replyMessage.value=""
 
-    if(!response.ok) throw new Error("Failed");
-
-    replyMessage.value="";
-    fileInput.value="";
-    fileNames.textContent="";
-    replyNotice.textContent="Reply sent successfully.";
-
-    setTimeout(loadTicket,800);
-  }catch(e){
-    replyNotice.textContent="Something went wrong.";
-  }finally{
-    sendBtn.disabled=false;
-  }
 }
 
-sendBtn.addEventListener("click",sendReply);
-refreshBtn.addEventListener("click",loadTicket);
+sendBtn.onclick=sendReply
+refreshBtn.onclick=loadTicket
 
-loadTicket();
+loadTicket()
+
 </script>
 
 </body>
