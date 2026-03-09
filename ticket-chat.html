@@ -1,671 +1,386 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ticket Chat</title>
-  <style>
-    * { box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ticket Chat</title>
 
-    :root{
-      --bg: #0b1020;
-      --panel: #121933;
-      --border: rgba(255,255,255,.08);
-      --text: #eef2ff;
-      --muted: #94a3b8;
-      --primary: #4f46e5;
-      --primary-2: #6d28d9;
-      --customer: #1a2242;
-      --danger-bg: rgba(239,68,68,.12);
-      --danger-border: rgba(239,68,68,.28);
-      --danger-text: #fecaca;
-    }
+<style>
 
-    body {
-      margin: 0;
-      font-family: Inter, Arial, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(79,70,229,.18), transparent 28%),
-        radial-gradient(circle at top right, rgba(109,40,217,.14), transparent 30%),
-        var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
+*{box-sizing:border-box;}
 
-    .page {
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      padding: 14px;
-    }
+body{
+margin:0;
+font-family:Inter,Arial;
+background:#0b1020;
+color:white;
+}
 
-    .chat-shell {
-      width: 100%;
-      max-width: 430px;
-      height: min(92vh, 860px);
-      background: rgba(18,25,51,.98);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      overflow: hidden;
-      box-shadow: 0 24px 60px rgba(0,0,0,.35);
-      display: flex;
-      flex-direction: column;
-    }
+.page{
+display:flex;
+justify-content:center;
+min-height:100vh;
+}
 
-    .topbar {
-      background: linear-gradient(135deg, #4f46e5 0%, #4338ca 42%, #6d28d9 100%);
-      color: #fff;
-      padding: 18px 16px 14px;
-      flex-shrink: 0;
-    }
+.chat-shell{
+width:100%;
+max-width:420px;
+height:100vh;
+display:flex;
+flex-direction:column;
+background:#121933;
+}
 
-    .topbar h1 {
-      margin: 0 0 8px;
-      font-size: 19px;
-      line-height: 1.1;
-      font-weight: 800;
-    }
+.topbar{
+background:linear-gradient(135deg,#4f46e5,#6d28d9);
+padding:16px;
+}
 
-    .topbar-meta {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
+.topbar h1{
+margin:0 0 8px;
+font-size:18px;
+}
 
-    .mini-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.12);
-      color: #fff;
-      padding: 7px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-    }
+.topbar-meta{
+display:flex;
+gap:8px;
+}
 
-    .mini-badge.status-open {
-      background: rgba(59,130,246,.16);
-      color: #dbeafe;
-      border-color: rgba(147,197,253,.2);
-    }
+.badge{
+padding:6px 10px;
+border-radius:20px;
+background:rgba(255,255,255,.15);
+font-size:12px;
+}
 
-    .mini-badge.status-closed {
-      background: rgba(239,68,68,.16);
-      color: #fecaca;
-      border-color: rgba(252,165,165,.2);
-    }
+.messages-wrap{
+flex:1;
+overflow:auto;
+padding:14px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
 
-    .messages-wrap {
-      flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-      padding: 14px 12px;
-      display: flex;
-      flex-direction: column;
-      background: rgba(255,255,255,.02);
-    }
+.bubble{
+display:inline-block;
+width:auto;
+max-width:80%;
+padding:10px 12px;
+border-radius:16px;
+font-size:13px;
+line-height:1.5;
+word-break:break-word;
+}
 
-    .chat-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+.customer{
+align-self:flex-start;
+background:#1a2242;
+}
 
-    .msg-row {
-      display: flex;
-      width: 100%;
-    }
+.support{
+align-self:flex-end;
+background:linear-gradient(135deg,#4f46e5,#6d28d9);
+}
 
-    .msg-row.customer {
-      justify-content: flex-start;
-    }
+.bubble-header{
+font-size:11px;
+opacity:.8;
+margin-bottom:6px;
+}
 
-    .msg-row.support {
-      justify-content: flex-end;
-    }
+.bubble-time{
+font-size:10px;
+opacity:.6;
+margin-top:6px;
+}
 
-    .bubble {
-      width: auto;
-      max-width: 82%;
-      padding: 10px 12px;
-      border-radius: 18px;
-      line-height: 1.55;
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-size: 13px;
-      box-shadow: 0 6px 18px rgba(0,0,0,.16);
-    }
+.reply-box{
+padding:10px;
+border-top:1px solid rgba(255,255,255,.08);
+background:#0b1020;
+}
 
-    .bubble.customer {
-      background: var(--customer);
-      color: #f8fafc;
-      border: 1px solid rgba(255,255,255,.05);
-      border-bottom-left-radius: 8px;
-    }
+.composer{
+position:relative;
+}
 
-    .bubble.support {
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      color: white;
-      border: 1px solid rgba(255,255,255,.08);
-      border-bottom-right-radius: 8px;
-    }
+textarea{
+width:100%;
+border-radius:16px;
+border:1px solid rgba(255,255,255,.1);
+background:#0b1020;
+color:white;
+padding:12px 90px 12px 12px;
+font-size:13px;
+resize:none;
+}
 
-    .bubble-header {
-      font-size: 11px;
-      font-weight: 800;
-      margin-bottom: 6px;
-      opacity: .88;
-    }
+.send-btn{
+position:absolute;
+right:6px;
+bottom:6px;
+border:none;
+border-radius:12px;
+background:linear-gradient(135deg,#4f46e5,#6d28d9);
+color:white;
+padding:8px 16px;
+font-weight:700;
+cursor:pointer;
+}
 
-    .bubble-time {
-      margin-top: 7px;
-      font-size: 10px;
-      color: rgba(255,255,255,.65);
-    }
+.actions{
+margin-top:10px;
+display:flex;
+gap:8px;
+}
 
-    .loading,
-    .not-found {
-      text-align: center;
-      padding: 28px 14px;
-      color: var(--muted);
-      font-size: 13px;
-    }
+.btn{
+border:none;
+border-radius:12px;
+padding:10px 14px;
+background:#111827;
+color:white;
+font-size:12px;
+cursor:pointer;
+}
 
-    .closed-box {
-      margin-top: 10px;
-      background: var(--danger-bg);
-      border: 1px solid var(--danger-border);
-      color: var(--danger-text);
-      padding: 12px 13px;
-      border-radius: 14px;
-      font-weight: 700;
-      line-height: 1.5;
-      font-size: 12px;
-    }
+.file-input{
+display:none;
+}
 
-    .reply-box {
-      border-top: 1px solid var(--border);
-      padding: 10px;
-      background: rgba(11,16,32,.96);
-      flex-shrink: 0;
-    }
+.file-label{
+border-radius:12px;
+padding:10px 14px;
+background:#111827;
+cursor:pointer;
+font-size:12px;
+}
 
-    .composer {
-      position: relative;
-    }
+.footer{
+text-align:center;
+font-size:11px;
+padding:6px;
+color:#94a3b8;
+}
 
-    .reply-box textarea {
-      width: 100%;
-      min-height: 78px;
-      max-height: 170px;
-      resize: vertical;
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 18px;
-      padding: 12px 110px 12px 14px;
-      font-size: 13px;
-      font-family: Inter, Arial, sans-serif;
-      outline: none;
-      background: #0b1020;
-      color: white;
-      line-height: 1.5;
-    }
-
-    .reply-box textarea::placeholder {
-      color: #94a3b8;
-    }
-
-    .reply-box textarea:focus {
-      border-color: rgba(99,102,241,.85);
-      box-shadow: 0 0 0 4px rgba(99,102,241,.14);
-    }
-
-    .send-inside {
-      position: absolute;
-      right: 8px;
-      bottom: 8px;
-      border: none;
-      border-radius: 12px;
-      padding: 10px 14px;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      color: white;
-      min-width: 90px;
-    }
-
-    .send-inside:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .reply-actions {
-      margin-top: 10px;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      border: none;
-      border-radius: 14px;
-      padding: 11px 14px;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
-      min-height: 42px;
-    }
-
-    .btn.secondary {
-      background: #111827;
-      color: #fff;
-      border: 1px solid rgba(255,255,255,.08);
-      min-width: 88px;
-    }
-
-    .file-label {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 14px;
-      padding: 11px 14px;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
-      background: #111827;
-      color: #fff;
-      border: 1px dashed rgba(255,255,255,.18);
-      min-height: 42px;
-    }
-
-    .file-input {
-      display: none;
-    }
-
-    .notice {
-      margin-top: 10px;
-      font-size: 12px;
-      color: #cbd5e1;
-      line-height: 1.5;
-    }
-
-    .footer-note {
-      padding: 0 10px 10px;
-      font-size: 11px;
-      color: #94a3b8;
-      line-height: 1.5;
-      flex-shrink: 0;
-      text-align: center;
-    }
-
-    @media (max-width: 480px) {
-      .page {
-        padding: 0;
-      }
-
-      .chat-shell {
-        max-width: 100%;
-        min-height: 100vh;
-        height: 100vh;
-        border-radius: 0;
-      }
-
-      .topbar {
-        padding: 16px 14px 12px;
-      }
-
-      .topbar h1 {
-        font-size: 18px;
-      }
-
-      .messages-wrap {
-        padding: 12px 10px;
-      }
-
-      .bubble {
-        max-width: 86%;
-      }
-
-      .reply-actions {
-        gap: 7px;
-      }
-
-      .btn.secondary,
-      .file-label {
-        min-width: unset;
-      }
-
-      .reply-box textarea {
-        padding-right: 98px;
-      }
-
-      .send-inside {
-        min-width: 82px;
-        padding: 9px 12px;
-      }
-    }
-  </style>
+</style>
 </head>
+
 <body>
-  <div class="page">
-    <div class="chat-shell">
-      <div class="topbar">
-        <h1>Support Ticket</h1>
-        <div class="topbar-meta">
-          <div class="mini-badge" id="ticketIdBadge">Ticket: --</div>
-          <div class="mini-badge" id="statusBadge">Status: --</div>
-        </div>
-      </div>
 
-      <div class="messages-wrap">
-        <div id="loading" class="loading">Loading ticket...</div>
-        <div id="notFound" class="not-found" style="display:none;">Ticket not found.</div>
-        <div id="chatList" class="chat-list" style="display:none;"></div>
+<div class="page">
 
-        <div id="closedBox" class="closed-box" style="display:none;">
-          This ticket is closed. You can no longer send messages.
-        </div>
-      </div>
+<div class="chat-shell">
 
-      <div id="replyBox" class="reply-box" style="display:none;">
-        <div class="composer">
-          <textarea id="replyMessage" placeholder="Write your message here..."></textarea>
-          <button id="sendBtn" class="send-inside">Send</button>
-        </div>
+<div class="topbar">
+<h1>Support Ticket</h1>
 
-        <div class="reply-actions">
-          <label class="file-label" for="fileInput">
-            Attach files
-          </label>
-          <input
-            id="fileInput"
-            class="file-input"
-            type="file"
-            multiple
-            accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
-          />
+<div class="topbar-meta">
+<div class="badge" id="ticketIdBadge">Ticket: --</div>
+<div class="badge" id="statusBadge">Status: --</div>
+</div>
 
-          <button id="refreshBtn" class="btn secondary" type="button">Refresh</button>
-        </div>
+</div>
 
-        <div id="fileNames" class="notice"></div>
-        <div id="replyNotice" class="notice"></div>
-      </div>
+<div class="messages-wrap" id="chatList"></div>
 
-      <div class="footer-note">
-        Keep this link private.
-      </div>
-    </div>
-  </div>
+<div class="reply-box">
 
-  <script>
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7DzUBQu_foss2Q28P_aEEyWHA7k7-dpKOlJtXS-7Sgm0AXlB6zklULk4CXp77CRX1G8IBqTnQ6avP/pub?output=csv";
-    const REPLY_WEBHOOK_URL = "PUT_YOUR_REPLY_WEBHOOK_HERE";
+<div class="composer">
 
-    const params = new URLSearchParams(window.location.search);
-    const ticketId = params.get("ticket");
+<textarea id="replyMessage" placeholder="Write your message here..."></textarea>
 
-    const ticketIdBadge = document.getElementById("ticketIdBadge");
-    const statusBadge = document.getElementById("statusBadge");
-    const loadingEl = document.getElementById("loading");
-    const notFoundEl = document.getElementById("notFound");
-    const chatList = document.getElementById("chatList");
-    const closedBox = document.getElementById("closedBox");
-    const replyBox = document.getElementById("replyBox");
-    const replyMessage = document.getElementById("replyMessage");
-    const sendBtn = document.getElementById("sendBtn");
-    const refreshBtn = document.getElementById("refreshBtn");
-    const replyNotice = document.getElementById("replyNotice");
-    const fileInput = document.getElementById("fileInput");
-    const fileNames = document.getElementById("fileNames");
+<button class="send-btn" id="sendBtn">Send</button>
 
-    let currentTicket = null;
+</div>
 
-    function parseCSV(text) {
-      const rows = [];
-      let row = [];
-      let current = "";
-      let inQuotes = false;
+<div class="actions">
 
-      for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        const next = text[i + 1];
+<label class="file-label" for="fileInput">Attach files</label>
+<input type="file" id="fileInput" class="file-input" multiple>
 
-        if (char === '"') {
-          if (inQuotes && next === '"') {
-            current += '"';
-            i++;
-          } else {
-            inQuotes = !inQuotes;
-          }
-        } else if (char === ',' && !inQuotes) {
-          row.push(current);
-          current = "";
-        } else if ((char === '\n' || char === '\r') && !inQuotes) {
-          if (char === '\r' && next === '\n') i++;
-          row.push(current);
-          rows.push(row);
-          row = [];
-          current = "";
-        } else {
-          current += char;
-        }
-      }
+<button class="btn" id="refreshBtn">Refresh</button>
 
-      if (current.length > 0 || row.length > 0) {
-        row.push(current);
-        rows.push(row);
-      }
+</div>
 
-      return rows.filter(r => r.some(cell => String(cell).trim() !== ""));
-    }
+</div>
 
-    function rowsToObjects(rows) {
-      const headers = rows[0].map(h => String(h).trim());
-      return rows.slice(1).map(row => {
-        const obj = {};
-        headers.forEach((header, index) => {
-          obj[header] = String(row[index] || "").trim();
-        });
-        return obj;
-      });
-    }
+<div class="footer">
+Keep this link private
+</div>
 
-    function escapeHtml(str) {
-      return String(str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
+</div>
+</div>
 
-    function renderStatusBadge(status) {
-      const s = String(status || "").toUpperCase();
-      if (s === "OPEN") {
-        statusBadge.className = "mini-badge status-open";
-        statusBadge.textContent = "Status: OPEN";
-      } else if (s === "CLOSED") {
-        statusBadge.className = "mini-badge status-closed";
-        statusBadge.textContent = "Status: CLOSED";
-      } else {
-        statusBadge.className = "mini-badge";
-        statusBadge.textContent = `Status: ${s || "--"}`;
-      }
-    }
+<script>
 
-    function renderTicket(ticket) {
-      currentTicket = ticket;
+const SHEET_CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7DzUBQu_foss2Q28P_aEEyWHA7k7-dpKOlJtXS-7Sgm0AXlB6zklULk4CXp77CRX1G8IBqTnQ6avP/pub?output=csv"
 
-      ticketIdBadge.textContent = `Ticket: ${ticket.ticket_id || "--"}`;
-      renderStatusBadge(ticket.status);
+const REPLY_WEBHOOK_URL="PUT_YOUR_REPLY_WEBHOOK_HERE"
 
-      loadingEl.style.display = "none";
-      chatList.style.display = "flex";
+const params=new URLSearchParams(window.location.search)
+const ticketId=params.get("ticket")
 
-      const isClosed = String(ticket.status || "").toUpperCase() === "CLOSED";
+const chatList=document.getElementById("chatList")
+const ticketIdBadge=document.getElementById("ticketIdBadge")
+const statusBadge=document.getElementById("statusBadge")
+const sendBtn=document.getElementById("sendBtn")
+const replyMessage=document.getElementById("replyMessage")
+const refreshBtn=document.getElementById("refreshBtn")
 
-      if (isClosed) {
-        closedBox.style.display = "block";
-        replyBox.style.display = "none";
-      } else {
-        closedBox.style.display = "none";
-        replyBox.style.display = "block";
-      }
+let currentTicket=null
 
-      const messages = [];
+function parseCSV(text){
 
-      if (ticket.message) {
-        messages.push({
-          sender: ticket.name || "You",
-          type: "customer",
-          text: ticket.message,
-          time: ticket.response_deadline || ""
-        });
-      }
+const rows=[]
+let row=[]
+let current=""
+let inQuotes=false
 
-      if (ticket.auto_reply) {
-        messages.push({
-          sender: "Support Team",
-          type: "support",
-          text: ticket.auto_reply,
-          time: ""
-        });
-      }
+for(let i=0;i<text.length;i++){
 
-      chatList.innerHTML = messages.map(msg => `
-        <div class="msg-row ${msg.type}">
-          <div class="bubble ${msg.type}">
-            <div class="bubble-header">${escapeHtml(msg.sender)}</div>
-            <div>${escapeHtml(msg.text)}</div>
-            <div class="bubble-time">${escapeHtml(msg.time)}</div>
-          </div>
-        </div>
-      `).join("");
-    }
+const char=text[i]
+const next=text[i+1]
 
-    async function loadTicket() {
-      loadingEl.style.display = "block";
-      notFoundEl.style.display = "none";
-      chatList.style.display = "none";
-      closedBox.style.display = "none";
-      replyBox.style.display = "none";
-      replyNotice.textContent = "";
-      fileNames.textContent = "";
+if(char=='"'){
 
-      if (!ticketId) {
-        loadingEl.style.display = "none";
-        notFoundEl.style.display = "block";
-        ticketIdBadge.textContent = "Ticket: --";
-        statusBadge.textContent = "Status: --";
-        return;
-      }
+if(inQuotes && next=='"'){
+current+='"'
+i++
+}else{
+inQuotes=!inQuotes
+}
 
-      try {
-        const response = await fetch(SHEET_CSV_URL + "&t=" + Date.now());
-        const csvText = await response.text();
-        const rows = parseCSV(csvText);
-        const objects = rowsToObjects(rows);
+}else if(char=="," && !inQuotes){
 
-        const ticket = objects.find(row => String(row.ticket_id).trim() === String(ticketId).trim());
+row.push(current)
+current=""
 
-        if (!ticket) {
-          loadingEl.style.display = "none";
-          notFoundEl.style.display = "block";
-          ticketIdBadge.textContent = `Ticket: ${ticketId}`;
-          statusBadge.textContent = "Status: --";
-          return;
-        }
+}else if((char=="\n"||char=="\r")&&!inQuotes){
 
-        renderTicket(ticket);
-      } catch (error) {
-        loadingEl.style.display = "none";
-        notFoundEl.style.display = "block";
-        ticketIdBadge.textContent = "Ticket: --";
-        statusBadge.textContent = "Status: --";
-      }
-    }
+row.push(current)
+rows.push(row)
+row=[]
+current=""
 
-    fileInput.addEventListener("change", () => {
-      const files = Array.from(fileInput.files || []);
-      if (!files.length) {
-        fileNames.textContent = "";
-        return;
-      }
+}else{
 
-      fileNames.textContent = "Selected files: " + files.map(file => file.name).join(", ");
-    });
+current+=char
 
-    async function sendReply() {
-      const message = replyMessage.value.trim();
+}
 
-      if (!message) {
-        replyNotice.textContent = "Please write a message first.";
-        return;
-      }
+}
 
-      if (!currentTicket) {
-        replyNotice.textContent = "Ticket data is missing.";
-        return;
-      }
+row.push(current)
+rows.push(row)
 
-      if (String(currentTicket.status || "").toUpperCase() === "CLOSED") {
-        replyNotice.textContent = "This ticket is closed.";
-        return;
-      }
+return rows
 
-      if (REPLY_WEBHOOK_URL === "PUT_YOUR_REPLY_WEBHOOK_HERE") {
-        replyNotice.textContent = "Reply webhook is not set yet.";
-        return;
-      }
+}
 
-      const files = Array.from(fileInput.files || []);
-      const attachments = files.map(file => ({
-        name: file.name,
-        type: file.type || "unknown",
-        size: file.size
-      }));
+function rowsToObjects(rows){
 
-      sendBtn.disabled = true;
-      replyNotice.textContent = "Sending reply...";
+const headers=rows[0]
 
-      try {
-        const response = await fetch(REPLY_WEBHOOK_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            ticket_id: currentTicket.ticket_id,
-            name: currentTicket.name,
-            email: currentTicket.email,
-            message: message,
-            attachments: attachments
-          })
-        });
+return rows.slice(1).map(row=>{
 
-        if (!response.ok) {
-          throw new Error("Failed");
-        }
+const obj={}
 
-        replyMessage.value = "";
-        fileInput.value = "";
-        fileNames.textContent = "";
-        replyNotice.textContent = "Reply sent successfully.";
-      } catch (error) {
-        replyNotice.textContent = "Something went wrong while sending your reply.";
-      } finally {
-        sendBtn.disabled = false;
-      }
-    }
+headers.forEach((h,i)=>{
+obj[h]=row[i]
+})
 
-    sendBtn.addEventListener("click", sendReply);
-    refreshBtn.addEventListener("click", loadTicket);
+return obj
 
-    loadTicket();
-  </script>
+})
+
+}
+
+function renderTicket(ticket){
+
+currentTicket=ticket
+
+ticketIdBadge.textContent="Ticket: "+ticket.ticket_id
+statusBadge.textContent="Status: "+ticket.status
+
+const messages=[]
+
+if(ticket.message){
+
+messages.push({
+sender:ticket.name,
+type:"customer",
+text:ticket.message,
+time:ticket.response_deadline
+})
+
+}
+
+if(ticket.auto_reply){
+
+messages.push({
+sender:"Support Team",
+type:"support",
+text:ticket.auto_reply,
+time:""
+})
+
+}
+
+chatList.innerHTML=messages.map(msg=>`
+
+<div class="bubble ${msg.type}">
+<div class="bubble-header">${msg.sender}</div>
+<div>${msg.text}</div>
+<div class="bubble-time">${msg.time||""}</div>
+</div>
+
+`).join("")
+
+chatList.scrollTop=chatList.scrollHeight
+
+}
+
+async function loadTicket(){
+
+const res=await fetch(SHEET_CSV_URL+"&t="+Date.now())
+const text=await res.text()
+
+const rows=parseCSV(text)
+const data=rowsToObjects(rows)
+
+const ticket=data.find(t=>t.ticket_id==ticketId)
+
+if(ticket) renderTicket(ticket)
+
+}
+
+async function sendReply(){
+
+const message=replyMessage.value.trim()
+
+if(!message) return
+
+await fetch(REPLY_WEBHOOK_URL,{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+ticket_id:currentTicket.ticket_id,
+message:message
+})
+})
+
+replyMessage.value=""
+
+}
+
+sendBtn.onclick=sendReply
+refreshBtn.onclick=loadTicket
+
+loadTicket()
+
+</script>
+
 </body>
 </html>
