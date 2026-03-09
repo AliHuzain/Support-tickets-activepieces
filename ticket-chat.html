@@ -16,7 +16,6 @@
       --primary: #4f46e5;
       --primary-2: #6d28d9;
       --customer: #1a2242;
-      --support-bg: linear-gradient(135deg, #4f46e5, #6d28d9);
       --danger-bg: rgba(239,68,68,.12);
       --danger-border: rgba(239,68,68,.28);
       --danger-text: #fecaca;
@@ -36,7 +35,6 @@
     .page {
       min-height: 100vh;
       display: flex;
-      align-items: center;
       justify-content: center;
       padding: 14px;
     }
@@ -115,9 +113,21 @@
       gap: 10px;
     }
 
+    .msg-row {
+      display: flex;
+      width: 100%;
+    }
+
+    .msg-row.customer {
+      justify-content: flex-start;
+    }
+
+    .msg-row.support {
+      justify-content: flex-end;
+    }
+
     .bubble {
-      display: inline-block;
-      width: fit-content;
+      width: auto;
       max-width: 82%;
       padding: 10px 12px;
       border-radius: 18px;
@@ -129,7 +139,6 @@
     }
 
     .bubble.customer {
-      align-self: flex-start;
       background: var(--customer);
       color: #f8fafc;
       border: 1px solid rgba(255,255,255,.05);
@@ -137,8 +146,7 @@
     }
 
     .bubble.support {
-      align-self: flex-end;
-      background: var(--support-bg);
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
       color: white;
       border: 1px solid rgba(255,255,255,.08);
       border-bottom-right-radius: 8px;
@@ -184,6 +192,10 @@
       flex-shrink: 0;
     }
 
+    .composer {
+      position: relative;
+    }
+
     .reply-box textarea {
       width: 100%;
       min-height: 78px;
@@ -191,7 +203,7 @@
       resize: vertical;
       border: 1px solid rgba(255,255,255,.10);
       border-radius: 18px;
-      padding: 12px 14px;
+      padding: 12px 110px 12px 14px;
       font-size: 13px;
       font-family: Inter, Arial, sans-serif;
       outline: none;
@@ -207,6 +219,26 @@
     .reply-box textarea:focus {
       border-color: rgba(99,102,241,.85);
       box-shadow: 0 0 0 4px rgba(99,102,241,.14);
+    }
+
+    .send-inside {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: white;
+      min-width: 90px;
+    }
+
+    .send-inside:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     .reply-actions {
@@ -225,17 +257,6 @@
       font-weight: 800;
       cursor: pointer;
       min-height: 42px;
-    }
-
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .btn.primary {
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      color: white;
-      flex: 1;
     }
 
     .btn.secondary {
@@ -316,6 +337,15 @@
       .file-label {
         min-width: unset;
       }
+
+      .reply-box textarea {
+        padding-right: 98px;
+      }
+
+      .send-inside {
+        min-width: 82px;
+        padding: 9px 12px;
+      }
     }
   </style>
 </head>
@@ -341,7 +371,10 @@
       </div>
 
       <div id="replyBox" class="reply-box" style="display:none;">
-        <textarea id="replyMessage" placeholder="Write your message here..."></textarea>
+        <div class="composer">
+          <textarea id="replyMessage" placeholder="Write your message here..."></textarea>
+          <button id="sendBtn" class="send-inside">Send</button>
+        </div>
 
         <div class="reply-actions">
           <label class="file-label" for="fileInput">
@@ -355,7 +388,6 @@
             accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
           />
 
-          <button id="sendBtn" class="btn primary">Send Reply</button>
           <button id="refreshBtn" class="btn secondary" type="button">Refresh</button>
         </div>
 
@@ -505,10 +537,12 @@
       }
 
       chatList.innerHTML = messages.map(msg => `
-        <div class="bubble ${msg.type}">
-          <div class="bubble-header">${escapeHtml(msg.sender)}</div>
-          <div>${escapeHtml(msg.text)}</div>
-          <div class="bubble-time">${escapeHtml(msg.time)}</div>
+        <div class="msg-row ${msg.type}">
+          <div class="bubble ${msg.type}">
+            <div class="bubble-header">${escapeHtml(msg.sender)}</div>
+            <div>${escapeHtml(msg.text)}</div>
+            <div class="bubble-time">${escapeHtml(msg.time)}</div>
+          </div>
         </div>
       `).join("");
     }
