@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ticket Chat</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f1220;
+      color: #f3f4f6;
+    }
+    .page {
+      max-width: 980px;
+      margin: 28px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: #171a2b;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 12px 34px rgba(0,0,0,0.24);
+    }
+    .topbar {
+      background: linear-gradient(135deg, #4f46e5, #312e81);
+      color: white;
+      padding: 26px;
+    }
+    .topbar h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+    .topbar p {
+      margin: 4px 0;
+      color: #e5e7eb;
+    }
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+      padding: 18px 24px;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .meta-box {
+      background: #0f1220;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .meta-box small {
+      display: block;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+    .meta-box strong {
+      color: white;
+      word-break: break-word;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .open { background: rgba(59,130,246,0.16); color: #93c5fd; }
+    .closed { background: rgba(239,68,68,0.16); color: #fca5a5; }
+    .other { background: rgba(168,85,247,0.16); color: #d8b4fe; }
+
+    .content {
+      padding: 24px;
+    }
+    .chat-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 240px;
+    }
+    .bubble {
+      max-width: 75%;
+      padding: 14px 16px;
+      border-radius: 18px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 14px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.16);
+    }
+    .bubble.customer {
+      align-self: flex-start;
+      background: #1f243f;
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #f9fafb;
+    }
+    .bubble.support {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #4f46e5, #5b21b6);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .sender {
+      font-size: 12px;
+      font-weight: 700;
+      opacity: .88;
+      margin-bottom: 8px;
+    }
+    .time {
+      margin-top: 8px;
+      font-size: 11px;
+      opacity: .7;
+    }
+    .reply-box {
+      margin-top: 22px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: #0f1220;
+      color: white;
+      padding: 14px;
+      resize: vertical;
+      outline: none;
+      font-size: 14px;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      align-items: center;
+    }
+    button, .file-label {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button.primary {
+      background: linear-gradient(135deg, #4f46e5, #5b21b6);
+      color: white;
+    }
+    button.secondary {
+      background: #111827;
+      color: white;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .file-label {
+      background: #111827;
+      color: white;
+      border: 1px dashed rgba(255,255,255,0.2);
+      display: inline-block;
+    }
+    input[type="file"] { display: none; }
+    .notice {
+      margin-top: 10px;
+      color: #cbd5e1;
+      font-size: 13px;
+    }
+    .closed-box {
+      margin-top: 18px;
+      background: rgba(239,68,68,0.12);
+      color: #fecaca;
+      border: 1px solid rgba(239,68,68,0.25);
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 700;
+    }
+    .empty {
+      color: #94a3b8;
+      text-align: center;
+      padding: 30px 10px;
+    }
+    @media (max-width: 700px) {
+      .bubble { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <div class="topbar">
+        <h1>Support Ticket</h1>
+        <p id="topTicketId">Loading...</p>
+        <p id="topSubject"></p>
+      </div>
+
+      <div id="metaWrap" class="meta" style="display:none;">
+        <div class="meta-box"><small>Ticket ID</small><strong id="mTicketId">-</strong></div>
+        <div class="meta-box"><small>Name</small><strong id="mName">-</strong></div>
+        <div class="meta-box"><small>Email</small><strong id="mEmail">-</strong></div>
+        <div class="meta-box"><small>Category</small><strong id="mCategory">-</strong></div>
+        <div class="meta-box"><small>Priority</small><strong id="mPriority">-</strong></div>
+        <div class="meta-box"><small>Status</small><strong id="mStatus">-</strong></div>
+      </div>
+
+      <div class="content">
+        <div id="loading" class="empty">Loading ticket...</div>
+        <div id="notFound" class="empty" style="display:none;">Ticket not found.</div>
+        <div id="chatList" class="chat-list" style="display:none;"></div>
+
+        <div id="closedBox" class="closed-box" style="display:none;">
+          This ticket is closed. You can no longer send new messages.
+        </div>
+
+        <div id="replyBox" class="reply-box" style="display:none;">
+          <h3 style="margin:0 0 10px;">Reply to this ticket</h3>
+          <textarea id="replyMessage" placeholder="Write your message here..."></textarea>
+
+          <div class="actions">
+            <label class="file-label">
+              Attach files / images
+              <input type="file" id="fileInput" multiple accept="image/*,.pdf,.doc,.docx,.png,.jpg,.jpeg" />
+            </label>
+            <button id="sendBtn" class="primary">Send Reply</button>
+            <button id="refreshBtn" class="secondary">Refresh</button>
+          </div>
+
+          <div id="fileNames" class="notice"></div>
+          <div id="replyNotice" class="notice"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7DzUBQu_foss2Q28P_aEEyWHA7k7-dpKOlJtXS-7Sgm0AXlB6zklULk4CXp77CRX1G8IBqTnQ6avP/pub?output=csv";
+    const REPLY_WEBHOOK_URL = "PUT_REPLY_WEBHOOK_HERE";
+
+    const params = new URLSearchParams(window.location.search);
+    const ticketId = params.get("ticket");
+
+    const topTicketId = document.getElementById("topTicketId");
+    const topSubject = document.getElementById("topSubject");
+    const metaWrap = document.getElementById("metaWrap");
+    const mTicketId = document.getElementById("mTicketId");
+    const mName = document.getElementById("mName");
+    const mEmail = document.getElementById("mEmail");
+    const mCategory = document.getElementById("mCategory");
+    const mPriority = document.getElementById("mPriority");
+    const mStatus = document.getElementById("mStatus");
+    const loading = document.getElementById("loading");
+    const notFound = document.getElementById("notFound");
+    const chatList = document.getElementById("chatList");
+    const closedBox = document.getElementById("closedBox");
+    const replyBox = document.getElementById("replyBox");
+    const replyMessage = document.getElementById("replyMessage");
+    const sendBtn = document.getElementById("sendBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const fileInput = document.getElementById("fileInput");
+    const fileNames = document.getElementById("fileNames");
+    const replyNotice = document.getElementById("replyNotice");
+
+    let currentTicket = null;
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let current = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const next = text[i + 1];
+        if (char === '"') {
+          if (inQuotes && next === '"') {
+            current += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === ',' && !inQuotes) {
+          row.push(current);
+          current = "";
+        } else if ((char === '\n' || char === '\r') && !inQuotes) {
+          if (char === '\r' && next === '\n') i++;
+          row.push(current);
+          rows.push(row);
+          row = [];
+          current = "";
+        } else {
+          current += char;
+        }
+      }
+      if (current.length > 0 || row.length > 0) {
+        row.push(current);
+        rows.push(row);
+      }
+      return rows.filter(r => r.some(cell => String(cell).trim() !== ""));
+    }
+
+    function rowsToObjects(rows) {
+      const headers = rows[0].map(h => String(h).trim());
+      return rows.slice(1).map(row => {
+        const obj = {};
+        headers.forEach((header, index) => obj[header] = String(row[index] || "").trim());
+        return obj;
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function statusBadge(status) {
+      const s = String(status || "").toUpperCase();
+      if (s === "OPEN") return `<span class="badge open">OPEN</span>`;
+      if (s === "CLOSED") return `<span class="badge closed">CLOSED</span>`;
+      return `<span class="badge other">${escapeHtml(s)}</span>`;
+    }
+
+    function renderTicket(ticket) {
+      currentTicket = ticket;
+      topTicketId.textContent = `Ticket ID: ${ticket.ticket_id || "-"}`;
+      topSubject.textContent = ticket.subject ? `Subject: ${ticket.subject}` : "";
+
+      mTicketId.textContent = ticket.ticket_id || "-";
+      mName.textContent = ticket.name || "-";
+      mEmail.textContent = ticket.email || "-";
+      mCategory.textContent = ticket.category || "-";
+      mPriority.textContent = ticket.priority_level || "-";
+      mStatus.innerHTML = statusBadge(ticket.status);
+
+      metaWrap.style.display = "grid";
+      loading.style.display = "none";
+      chatList.style.display = "flex";
+
+      const isClosed = String(ticket.status || "").toUpperCase() === "CLOSED";
+      closedBox.style.display = isClosed ? "block" : "none";
+      replyBox.style.display = isClosed ? "none" : "block";
+
+      const messages = [];
+
+      if (ticket.message) {
+        messages.push({
+          type: "customer",
+          sender: ticket.name || "Customer",
+          text: ticket.message
+        });
+      }
+
+      if (ticket.auto_reply) {
+        messages.push({
+          type: "support",
+          sender: "Support Team",
+          text: ticket.auto_reply
+        });
+      }
+
+      chatList.innerHTML = messages.map(msg => `
+        <div class="bubble ${msg.type}">
+          <div class="sender">${escapeHtml(msg.sender)}</div>
+          <div>${escapeHtml(msg.text)}</div>
+        </div>
+      `).join("");
+    }
+
+    async function loadTicket() {
+      loading.style.display = "block";
+      notFound.style.display = "none";
+      chatList.style.display = "none";
+      metaWrap.style.display = "none";
+      closedBox.style.display = "none";
+      replyBox.style.display = "none";
+      replyNotice.textContent = "";
+
+      if (!ticketId) {
+        loading.style.display = "none";
+        notFound.style.display = "block";
+        topTicketId.textContent = "No ticket id provided.";
+        return;
+      }
+
+      try {
+        const res = await fetch(SHEET_CSV_URL);
+        const csv = await res.text();
+        const rows = parseCSV(csv);
+        const data = rowsToObjects(rows);
+        const ticket = data.find(t => String(t.ticket_id) === String(ticketId));
+
+        if (!ticket) {
+          loading.style.display = "none";
+          notFound.style.display = "block";
+          return;
+        }
+
+        renderTicket(ticket);
+      } catch {
+        loading.style.display = "none";
+        notFound.style.display = "block";
+        topTicketId.textContent = "Could not load ticket.";
+      }
+    }
+
+    async function sendReply() {
+      const text = replyMessage.value.trim();
+      if (!text) {
+        replyNotice.textContent = "Please write a message first.";
+        return;
+      }
+
+      if (!currentTicket) {
+        replyNotice.textContent = "Ticket not loaded.";
+        return;
+      }
+
+      if (String(currentTicket.status || "").toUpperCase() === "CLOSED") {
+        replyNotice.textContent = "This ticket is closed.";
+        return;
+      }
+
+      if (REPLY_WEBHOOK_URL === "PUT_REPLY_WEBHOOK_HERE") {
+        replyNotice.textContent = "Reply webhook not set yet.";
+        return;
+      }
+
+      const files = Array.from(fileInput.files || []);
+      const attachmentNames = files.map(f => f.name).join(", ");
+
+      sendBtn.disabled = true;
+      replyNotice.textContent = "Sending reply...";
+
+      try {
+        const res = await fetch(REPLY_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ticket_id: currentTicket.ticket_id,
+            name: currentTicket.name,
+            email: currentTicket.email,
+            message: text,
+            attachments: attachmentNames
+          })
+        });
+
+        if (!res.ok) throw new Error("Failed");
+
+        replyMessage.value = "";
+        fileInput.value = "";
+        fileNames.textContent = "";
+        replyNotice.textContent = "Reply sent successfully.";
+      } catch {
+        replyNotice.textContent = "Something went wrong while sending your reply.";
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    fileInput.addEventListener("change", () => {
+      const files = Array.from(fileInput.files || []);
+      fileNames.textContent = files.length ? `Selected files: ${files.map(f => f.name).join(", ")}` : "";
+    });
+
+    sendBtn.addEventListener("click", sendReply);
+    refreshBtn.addEventListener("click", loadTicket);
+
+    loadTicket();
+  </script>
+</body>
+</html>
