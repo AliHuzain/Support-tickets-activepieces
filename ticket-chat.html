@@ -10,14 +10,13 @@
     :root{
       --bg: #0b1020;
       --panel: #121933;
-      --panel-2: #0f172a;
       --border: rgba(255,255,255,.08);
       --text: #eef2ff;
-      --muted: #a5b4fc;
-      --muted-2: #94a3b8;
+      --muted: #94a3b8;
       --primary: #4f46e5;
       --primary-2: #6d28d9;
       --customer: #1a2242;
+      --support-bg: linear-gradient(135deg, #4f46e5, #6d28d9);
       --danger-bg: rgba(239,68,68,.12);
       --danger-border: rgba(239,68,68,.28);
       --danger-text: #fecaca;
@@ -39,129 +38,75 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 18px;
+      padding: 14px;
     }
 
     .chat-shell {
       width: 100%;
-      max-width: 420px;
+      max-width: 430px;
       height: min(92vh, 860px);
       background: rgba(18,25,51,.98);
       border: 1px solid var(--border);
-      border-radius: 28px;
+      border-radius: 24px;
       overflow: hidden;
-      box-shadow: 0 24px 60px rgba(0,0,0,.38);
+      box-shadow: 0 24px 60px rgba(0,0,0,.35);
       display: flex;
       flex-direction: column;
-      backdrop-filter: blur(10px);
     }
 
     .topbar {
       background: linear-gradient(135deg, #4f46e5 0%, #4338ca 42%, #6d28d9 100%);
       color: #fff;
-      padding: 18px 18px 16px;
+      padding: 18px 16px 14px;
       flex-shrink: 0;
     }
 
     .topbar h1 {
-      margin: 0 0 4px;
-      font-size: 18px;
-      line-height: 1.15;
-      letter-spacing: -.02em;
+      margin: 0 0 8px;
+      font-size: 19px;
+      line-height: 1.1;
       font-weight: 800;
     }
 
-    .topbar p {
-      margin: 2px 0;
-      color: rgba(255,255,255,.9);
-      font-size: 12px;
-      line-height: 1.4;
-    }
-
-    .ticket-meta {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    .topbar-meta {
+      display: flex;
       gap: 8px;
-      padding: 12px;
-      background: rgba(255,255,255,.02);
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
+      flex-wrap: wrap;
     }
 
-    .meta-box {
-      background: var(--panel-2);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 10px 12px;
-      min-height: 58px;
-    }
-
-    .meta-label {
-      font-size: 10px;
-      color: var(--muted-2);
-      margin-bottom: 5px;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      font-weight: 700;
-    }
-
-    .meta-value {
-      font-size: 12px;
-      font-weight: 700;
-      color: #fff;
-      word-break: break-word;
-      line-height: 1.35;
-    }
-
-    .status-badge {
+    .mini-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 5px 9px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.12);
+      color: #fff;
+      padding: 7px 10px;
       border-radius: 999px;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .02em;
+      font-size: 12px;
+      font-weight: 700;
     }
 
-    .status-open {
+    .mini-badge.status-open {
       background: rgba(59,130,246,.16);
-      color: #93c5fd;
+      color: #dbeafe;
+      border-color: rgba(147,197,253,.2);
     }
 
-    .status-closed {
+    .mini-badge.status-closed {
       background: rgba(239,68,68,.16);
-      color: #fca5a5;
-    }
-
-    .status-other {
-      background: rgba(168,85,247,.16);
-      color: #d8b4fe;
-    }
-
-    .chat-body {
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-      flex: 1;
+      color: #fecaca;
+      border-color: rgba(252,165,165,.2);
     }
 
     .messages-wrap {
       flex: 1;
       min-height: 0;
       overflow-y: auto;
-      padding: 14px 12px 10px;
+      padding: 14px 12px;
       display: flex;
       flex-direction: column;
-    }
-
-    .section-title {
-      margin: 0 0 12px;
-      font-size: 13px;
-      color: #fff;
-      letter-spacing: -.01em;
-      font-weight: 800;
-      opacity: .92;
+      background: rgba(255,255,255,.02);
     }
 
     .chat-list {
@@ -193,7 +138,7 @@
 
     .bubble.support {
       align-self: flex-end;
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      background: var(--support-bg);
       color: white;
       border: 1px solid rgba(255,255,255,.08);
       border-bottom-right-radius: 8px;
@@ -204,7 +149,6 @@
       font-weight: 800;
       margin-bottom: 6px;
       opacity: .88;
-      letter-spacing: .02em;
     }
 
     .bubble-time {
@@ -217,7 +161,7 @@
     .not-found {
       text-align: center;
       padding: 28px 14px;
-      color: #94a3b8;
+      color: var(--muted);
       font-size: 13px;
     }
 
@@ -235,23 +179,15 @@
 
     .reply-box {
       border-top: 1px solid var(--border);
-      padding: 10px 10px 12px;
-      background: rgba(11,16,32,.82);
-      backdrop-filter: blur(8px);
+      padding: 10px;
+      background: rgba(11,16,32,.96);
       flex-shrink: 0;
-    }
-
-    .reply-box h3 {
-      margin: 0 0 8px;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 800;
     }
 
     .reply-box textarea {
       width: 100%;
-      min-height: 84px;
-      max-height: 180px;
+      min-height: 78px;
+      max-height: 170px;
       resize: vertical;
       border: 1px solid rgba(255,255,255,.10);
       border-radius: 18px;
@@ -261,7 +197,6 @@
       outline: none;
       background: #0b1020;
       color: white;
-      transition: .2s ease;
       line-height: 1.5;
     }
 
@@ -289,24 +224,17 @@
       font-size: 12px;
       font-weight: 800;
       cursor: pointer;
-      transition: .2s ease;
       min-height: 42px;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
     }
 
     .btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
-      transform: none;
     }
 
     .btn.primary {
       background: linear-gradient(135deg, var(--primary), var(--primary-2));
       color: white;
-      box-shadow: 0 10px 20px rgba(79,70,229,.22);
       flex: 1;
     }
 
@@ -314,14 +242,13 @@
       background: #111827;
       color: #fff;
       border: 1px solid rgba(255,255,255,.08);
-      min-width: 90px;
+      min-width: 88px;
     }
 
     .file-label {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
       border-radius: 14px;
       padding: 11px 14px;
       font-size: 12px;
@@ -330,13 +257,7 @@
       background: #111827;
       color: #fff;
       border: 1px dashed rgba(255,255,255,.18);
-      transition: .2s ease;
       min-height: 42px;
-    }
-
-    .file-label:hover {
-      transform: translateY(-1px);
-      border-color: rgba(99,102,241,.55);
     }
 
     .file-input {
@@ -351,11 +272,12 @@
     }
 
     .footer-note {
-      padding: 0 12px 12px;
+      padding: 0 10px 10px;
       font-size: 11px;
       color: #94a3b8;
       line-height: 1.5;
       flex-shrink: 0;
+      text-align: center;
     }
 
     @media (max-width: 480px) {
@@ -371,27 +293,28 @@
       }
 
       .topbar {
-        padding: 16px 14px 14px;
+        padding: 16px 14px 12px;
       }
 
       .topbar h1 {
-        font-size: 17px;
-      }
-
-      .ticket-meta {
-        padding: 10px;
+        font-size: 18px;
       }
 
       .messages-wrap {
-        padding: 12px 10px 8px;
-      }
-
-      .reply-box {
-        padding: 10px;
+        padding: 12px 10px;
       }
 
       .bubble {
         max-width: 86%;
+      }
+
+      .reply-actions {
+        gap: 7px;
+      }
+
+      .btn.secondary,
+      .file-label {
+        min-width: unset;
       }
     }
   </style>
@@ -401,77 +324,47 @@
     <div class="chat-shell">
       <div class="topbar">
         <h1>Support Ticket</h1>
-        <p id="topTicketId">Loading...</p>
-        <p id="topSubject"></p>
-      </div>
-
-      <div id="ticketMeta" class="ticket-meta" style="display:none;">
-        <div class="meta-box">
-          <div class="meta-label">Ticket ID</div>
-          <div class="meta-value" id="metaTicketId">-</div>
-        </div>
-        <div class="meta-box">
-          <div class="meta-label">Customer</div>
-          <div class="meta-value" id="metaName">-</div>
-        </div>
-        <div class="meta-box">
-          <div class="meta-label">Email</div>
-          <div class="meta-value" id="metaEmail">-</div>
-        </div>
-        <div class="meta-box">
-          <div class="meta-label">Category</div>
-          <div class="meta-value" id="metaCategory">-</div>
-        </div>
-        <div class="meta-box">
-          <div class="meta-label">Priority</div>
-          <div class="meta-value" id="metaPriority">-</div>
-        </div>
-        <div class="meta-box">
-          <div class="meta-label">Status</div>
-          <div class="meta-value" id="metaStatus">-</div>
+        <div class="topbar-meta">
+          <div class="mini-badge" id="ticketIdBadge">Ticket: --</div>
+          <div class="mini-badge" id="statusBadge">Status: --</div>
         </div>
       </div>
 
-      <div class="chat-body">
-        <div class="messages-wrap">
-          <h2 class="section-title">Conversation</h2>
+      <div class="messages-wrap">
+        <div id="loading" class="loading">Loading ticket...</div>
+        <div id="notFound" class="not-found" style="display:none;">Ticket not found.</div>
+        <div id="chatList" class="chat-list" style="display:none;"></div>
 
-          <div id="loading" class="loading">Loading ticket...</div>
-          <div id="notFound" class="not-found" style="display:none;">Ticket not found.</div>
-          <div id="chatList" class="chat-list" style="display:none;"></div>
+        <div id="closedBox" class="closed-box" style="display:none;">
+          This ticket is closed. You can no longer send messages.
+        </div>
+      </div>
 
-          <div id="closedBox" class="closed-box" style="display:none;">
-            This ticket is closed. Only the owner can continue from the support side.
-          </div>
+      <div id="replyBox" class="reply-box" style="display:none;">
+        <textarea id="replyMessage" placeholder="Write your message here..."></textarea>
+
+        <div class="reply-actions">
+          <label class="file-label" for="fileInput">
+            Attach files
+          </label>
+          <input
+            id="fileInput"
+            class="file-input"
+            type="file"
+            multiple
+            accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
+          />
+
+          <button id="sendBtn" class="btn primary">Send Reply</button>
+          <button id="refreshBtn" class="btn secondary" type="button">Refresh</button>
         </div>
 
-        <div id="replyBox" class="reply-box" style="display:none;">
-          <h3>Reply to this ticket</h3>
-          <textarea id="replyMessage" placeholder="Write your message here..."></textarea>
+        <div id="fileNames" class="notice"></div>
+        <div id="replyNotice" class="notice"></div>
+      </div>
 
-          <div class="reply-actions">
-            <label class="file-label" for="fileInput">
-              Attach files / images
-            </label>
-            <input
-              id="fileInput"
-              class="file-input"
-              type="file"
-              multiple
-              accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
-            />
-
-            <button id="sendBtn" class="btn primary">Send Reply</button>
-            <button id="refreshBtn" class="btn secondary" type="button">Refresh</button>
-          </div>
-
-          <div id="fileNames" class="notice"></div>
-          <div id="replyNotice" class="notice"></div>
-        </div>
-
-        <div class="footer-note">
-          Keep this link private. It is intended only for this ticket conversation.
-        </div>
+      <div class="footer-note">
+        Keep this link private.
       </div>
     </div>
   </div>
@@ -483,15 +376,8 @@
     const params = new URLSearchParams(window.location.search);
     const ticketId = params.get("ticket");
 
-    const topTicketId = document.getElementById("topTicketId");
-    const topSubject = document.getElementById("topSubject");
-    const ticketMeta = document.getElementById("ticketMeta");
-    const metaTicketId = document.getElementById("metaTicketId");
-    const metaName = document.getElementById("metaName");
-    const metaEmail = document.getElementById("metaEmail");
-    const metaCategory = document.getElementById("metaCategory");
-    const metaPriority = document.getElementById("metaPriority");
-    const metaStatus = document.getElementById("metaStatus");
+    const ticketIdBadge = document.getElementById("ticketIdBadge");
+    const statusBadge = document.getElementById("statusBadge");
     const loadingEl = document.getElementById("loading");
     const notFoundEl = document.getElementById("notFound");
     const chatList = document.getElementById("chatList");
@@ -565,27 +451,26 @@
         .replace(/'/g, "&#039;");
     }
 
-    function makeStatusBadge(status) {
+    function renderStatusBadge(status) {
       const s = String(status || "").toUpperCase();
-      if (s === "OPEN") return `<span class="status-badge status-open">OPEN</span>`;
-      if (s === "CLOSED") return `<span class="status-badge status-closed">CLOSED</span>`;
-      return `<span class="status-badge status-other">${escapeHtml(s || "UNKNOWN")}</span>`;
+      if (s === "OPEN") {
+        statusBadge.className = "mini-badge status-open";
+        statusBadge.textContent = "Status: OPEN";
+      } else if (s === "CLOSED") {
+        statusBadge.className = "mini-badge status-closed";
+        statusBadge.textContent = "Status: CLOSED";
+      } else {
+        statusBadge.className = "mini-badge";
+        statusBadge.textContent = `Status: ${s || "--"}`;
+      }
     }
 
     function renderTicket(ticket) {
       currentTicket = ticket;
 
-      topTicketId.textContent = `Ticket ID: ${ticket.ticket_id || "-"}`;
-      topSubject.textContent = ticket.subject ? `Subject: ${ticket.subject}` : "";
+      ticketIdBadge.textContent = `Ticket: ${ticket.ticket_id || "--"}`;
+      renderStatusBadge(ticket.status);
 
-      metaTicketId.textContent = ticket.ticket_id || "-";
-      metaName.textContent = ticket.name || "-";
-      metaEmail.textContent = ticket.email || "-";
-      metaCategory.textContent = ticket.category || "-";
-      metaPriority.textContent = ticket.priority_level || "-";
-      metaStatus.innerHTML = makeStatusBadge(ticket.status);
-
-      ticketMeta.style.display = "grid";
       loadingEl.style.display = "none";
       chatList.style.display = "flex";
 
@@ -603,7 +488,7 @@
 
       if (ticket.message) {
         messages.push({
-          sender: ticket.name || "Customer",
+          sender: ticket.name || "You",
           type: "customer",
           text: ticket.message,
           time: ticket.response_deadline || ""
@@ -632,7 +517,6 @@
       loadingEl.style.display = "block";
       notFoundEl.style.display = "none";
       chatList.style.display = "none";
-      ticketMeta.style.display = "none";
       closedBox.style.display = "none";
       replyBox.style.display = "none";
       replyNotice.textContent = "";
@@ -641,7 +525,8 @@
       if (!ticketId) {
         loadingEl.style.display = "none";
         notFoundEl.style.display = "block";
-        topTicketId.textContent = "No ticket id provided.";
+        ticketIdBadge.textContent = "Ticket: --";
+        statusBadge.textContent = "Status: --";
         return;
       }
 
@@ -656,8 +541,8 @@
         if (!ticket) {
           loadingEl.style.display = "none";
           notFoundEl.style.display = "block";
-          topTicketId.textContent = `Ticket ID: ${ticketId}`;
-          topSubject.textContent = "";
+          ticketIdBadge.textContent = `Ticket: ${ticketId}`;
+          statusBadge.textContent = "Status: --";
           return;
         }
 
@@ -665,7 +550,8 @@
       } catch (error) {
         loadingEl.style.display = "none";
         notFoundEl.style.display = "block";
-        topTicketId.textContent = "Could not load ticket.";
+        ticketIdBadge.textContent = "Ticket: --";
+        statusBadge.textContent = "Status: --";
       }
     }
 
