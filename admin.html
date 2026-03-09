@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -295,7 +294,6 @@
 
   <script>
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7DzUBQu_foss2Q28P_aEEyWHA7k7-dpKOlJtXS-7Sgm0AXlB6zklULk4CXp77CRX1G8IBqTnQ6avP/pub?output=csv";
-    const ADMIN_REPLY_WEBHOOK_URL = "https://cloud.activepieces.com/api/v1/webhooks/OsdvEzv3yCnuL4Oe7wyZJ";
 
     const ticketList = document.getElementById("ticketList");
     const searchInput = document.getElementById("searchInput");
@@ -310,10 +308,6 @@
     const dCategory = document.getElementById("dCategory");
     const dStatus = document.getElementById("dStatus");
     const statusSelect = document.getElementById("statusSelect");
-    const replyText = document.getElementById("replyText");
-    const sendReplyBtn = document.getElementById("sendReplyBtn");
-    const refreshBtn = document.getElementById("refreshBtn");
-    const notice = document.getElementById("notice");
 
     let tickets = [];
     let selectedTicket = null;
@@ -459,3 +453,20 @@
       try {
         const res = await fetch(SHEET_CSV_URL + "&t=" + Date.now());
         const csv = await res.text();
+        const rows = parseCSV(csv);
+        if (!rows.length || rows.length < 2) {
+          ticketList.innerHTML = `<div class="empty">No tickets found.</div>`;
+          return;
+        }
+        tickets = rowsToObjects(rows).filter(t => t.ticket_id);
+        renderList();
+      } catch (e) {
+        ticketList.innerHTML = `<div class="empty">Could not load tickets.</div>`;
+      }
+    }
+
+    searchInput.addEventListener("input", renderList);
+    loadTickets();
+  </script>
+</body>
+</html>
