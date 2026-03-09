@@ -21,8 +21,6 @@
       --danger-bg: rgba(239,68,68,.12);
       --danger-border: rgba(239,68,68,.28);
       --danger-text: #fecaca;
-      --success-bg: rgba(34,197,94,.12);
-      --success-text: #bbf7d0;
     }
 
     body {
@@ -147,8 +145,10 @@
     }
 
     .bubble {
-      max-width: 78%;
-      padding: 14px 16px;
+      display: inline-block;
+      width: fit-content;
+      max-width: 75%;
+      padding: 12px 14px;
       border-radius: 18px;
       line-height: 1.7;
       white-space: pre-wrap;
@@ -262,6 +262,31 @@
       border: 1px solid rgba(255,255,255,.08);
     }
 
+    .file-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      background: #111827;
+      color: #fff;
+      border: 1px dashed rgba(255,255,255,.18);
+      transition: .2s ease;
+    }
+
+    .file-label:hover {
+      transform: translateY(-1px);
+      border-color: rgba(99,102,241,.55);
+    }
+
+    .file-input {
+      display: none;
+    }
+
     .notice {
       margin-top: 12px;
       font-size: 13px;
@@ -336,7 +361,8 @@
         align-items: stretch;
       }
 
-      .btn {
+      .btn,
+      .file-label {
         width: 100%;
       }
     }
@@ -435,10 +461,22 @@
           <textarea id="replyMessage" placeholder="Write your message here..."></textarea>
 
           <div class="reply-actions">
+            <label class="file-label" for="fileInput">
+              Attach files / images
+            </label>
+            <input
+              id="fileInput"
+              class="file-input"
+              type="file"
+              multiple
+              accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
+            />
+
             <button id="sendBtn" class="btn primary">Send Reply</button>
             <button id="refreshBtn" class="btn secondary" type="button">Refresh</button>
           </div>
 
+          <div id="fileNames" class="notice"></div>
           <div id="replyNotice" class="notice"></div>
         </div>
       </div>
@@ -474,6 +512,8 @@
     const sendBtn = document.getElementById("sendBtn");
     const refreshBtn = document.getElementById("refreshBtn");
     const replyNotice = document.getElementById("replyNotice");
+    const fileInput = document.getElementById("fileInput");
+    const fileNames = document.getElementById("fileNames");
 
     let currentTicket = null;
 
@@ -607,6 +647,7 @@
       closedBox.style.display = "none";
       replyBox.style.display = "none";
       replyNotice.textContent = "";
+      fileNames.textContent = "";
 
       if (!ticketId) {
         loadingEl.style.display = "none";
@@ -639,6 +680,16 @@
       }
     }
 
+    fileInput.addEventListener("change", () => {
+      const files = Array.from(fileInput.files || []);
+      if (!files.length) {
+        fileNames.textContent = "";
+        return;
+      }
+
+      fileNames.textContent = "Selected files: " + files.map(file => file.name).join(", ");
+    });
+
     async function sendReply() {
       const message = replyMessage.value.trim();
 
@@ -662,6 +713,13 @@
         return;
       }
 
+      const files = Array.from(fileInput.files || []);
+      const attachments = files.map(file => ({
+        name: file.name,
+        type: file.type || "unknown",
+        size: file.size
+      }));
+
       sendBtn.disabled = true;
       replyNotice.textContent = "Sending reply...";
 
@@ -675,7 +733,8 @@
             ticket_id: currentTicket.ticket_id,
             name: currentTicket.name,
             email: currentTicket.email,
-            message: message
+            message: message,
+            attachments: attachments
           })
         });
 
@@ -684,6 +743,8 @@
         }
 
         replyMessage.value = "";
+        fileInput.value = "";
+        fileNames.textContent = "";
         replyNotice.textContent = "Reply sent successfully.";
       } catch (error) {
         replyNotice.textContent = "Something went wrong while sending your reply.";
