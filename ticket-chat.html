@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ticket Chat</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
+    .page {
+      max-width: 1000px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    }
+    .topbar {
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: #fff;
+      padding: 24px;
+    }
+    .topbar h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+    .topbar p {
+      margin: 4px 0;
+      opacity: 0.95;
+    }
+    .ticket-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      padding: 20px 24px;
+      background: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .meta-box {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .meta-label {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .meta-value {
+      font-size: 14px;
+      font-weight: 700;
+      word-break: break-word;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .status-open {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+    .status-closed {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    .status-other {
+      background: #ede9fe;
+      color: #6d28d9;
+    }
+    .messages-wrap {
+      padding: 24px;
+    }
+    .section-title {
+      margin: 0 0 16px;
+      font-size: 18px;
+    }
+    .chat-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .bubble {
+      max-width: 80%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      line-height: 1.6;
+      border: 1px solid #e5e7eb;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .bubble.customer {
+      align-self: flex-start;
+      background: #f9fafb;
+    }
+    .bubble.support {
+      align-self: flex-end;
+      background: #eef2ff;
+      border-color: #c7d2fe;
+    }
+    .bubble-header {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .bubble-time {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .reply-box {
+      margin-top: 24px;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 20px;
+    }
+    .reply-box textarea {
+      width: 100%;
+      min-height: 130px;
+      resize: vertical;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 15px;
+      font-family: Arial, sans-serif;
+      outline: none;
+    }
+    .reply-box textarea:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+    }
+    .reply-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .btn.secondary {
+      background: #111827;
+    }
+    .notice {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #374151;
+    }
+    .closed-box {
+      margin-top: 20px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 700;
+    }
+    .loading, .not-found {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6b7280;
+    }
+    .footer-note {
+      padding: 18px 24px 24px;
+      font-size: 13px;
+      color: #6b7280;
+    }
+    @media (max-width: 700px) {
+      .bubble { max-width: 100%; }
+      .topbar h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <div class="topbar">
+        <h1>Support Ticket</h1>
+        <p id="topTicketId">Loading...</p>
+        <p id="topSubject"></p>
+      </div>
+
+      <div id="ticketMeta" class="ticket-meta" style="display:none;">
+        <div class="meta-box">
+          <div class="meta-label">Ticket ID</div>
+          <div class="meta-value" id="metaTicketId">-</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">Customer</div>
+          <div class="meta-value" id="metaName">-</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">Email</div>
+          <div class="meta-value" id="metaEmail">-</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">Category</div>
+          <div class="meta-value" id="metaCategory">-</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">Priority</div>
+          <div class="meta-value" id="metaPriority">-</div>
+        </div>
+        <div class="meta-box">
+          <div class="meta-label">Status</div>
+          <div class="meta-value" id="metaStatus">-</div>
+        </div>
+      </div>
+
+      <div class="messages-wrap">
+        <h2 class="section-title">Conversation</h2>
+
+        <div id="loading" class="loading">Loading ticket...</div>
+        <div id="notFound" class="not-found" style="display:none;">Ticket not found.</div>
+        <div id="chatList" class="chat-list" style="display:none;"></div>
+
+        <div id="closedBox" class="closed-box" style="display:none;">
+          This ticket is closed. Only the owner can continue from the support side.
+        </div>
+
+        <div id="replyBox" class="reply-box" style="display:none;">
+          <h3 style="margin:0 0 12px;">Reply to this ticket</h3>
+          <textarea id="replyMessage" placeholder="Write your message here..."></textarea>
+
+          <div class="reply-actions">
+            <button id="sendBtn" class="btn">Send Reply</button>
+            <button id="refreshBtn" class="btn secondary" type="button">Refresh</button>
+          </div>
+
+          <div id="replyNotice" class="notice"></div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        Keep this link private. It is intended only for this ticket conversation.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7DzUBQu_foss2Q28P_aEEyWHA7k7-dpKOlJtXS-7Sgm0AXlB6zklULk4CXp77CRX1G8IBqTnQ6avP/pub?output=csv";
+    const REPLY_WEBHOOK_URL = "PUT_YOUR_REPLY_WEBHOOK_HERE";
+
+    const params = new URLSearchParams(window.location.search);
+    const ticketId = params.get("ticket");
+
+    const topTicketId = document.getElementById("topTicketId");
+    const topSubject = document.getElementById("topSubject");
+    const ticketMeta = document.getElementById("ticketMeta");
+    const metaTicketId = document.getElementById("metaTicketId");
+    const metaName = document.getElementById("metaName");
+    const metaEmail = document.getElementById("metaEmail");
+    const metaCategory = document.getElementById("metaCategory");
+    const metaPriority = document.getElementById("metaPriority");
+    const metaStatus = document.getElementById("metaStatus");
+    const loadingEl = document.getElementById("loading");
+    const notFoundEl = document.getElementById("notFound");
+    const chatList = document.getElementById("chatList");
+    const closedBox = document.getElementById("closedBox");
+    const replyBox = document.getElementById("replyBox");
+    const replyMessage = document.getElementById("replyMessage");
+    const sendBtn = document.getElementById("sendBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const replyNotice = document.getElementById("replyNotice");
+
+    let currentTicket = null;
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let current = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (char === '"') {
+          if (inQuotes && next === '"') {
+            current += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === ',' && !inQuotes) {
+          row.push(current);
+          current = "";
+        } else if ((char === '\n' || char === '\r') && !inQuotes) {
+          if (char === '\r' && next === '\n') i++;
+          row.push(current);
+          rows.push(row);
+          row = [];
+          current = "";
+        } else {
+          current += char;
+        }
+      }
+
+      if (current.length > 0 || row.length > 0) {
+        row.push(current);
+        rows.push(row);
+      }
+
+      return rows.filter(r => r.some(cell => String(cell).trim() !== ""));
+    }
+
+    function rowsToObjects(rows) {
+      const headers = rows[0].map(h => String(h).trim());
+      return rows.slice(1).map(row => {
+        const obj = {};
+        headers.forEach((header, index) => {
+          obj[header] = String(row[index] || "").trim();
+        });
+        return obj;
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function makeStatusBadge(status) {
+      const s = String(status || "").toUpperCase();
+      if (s === "OPEN") return `<span class="status-badge status-open">OPEN</span>`;
+      if (s === "CLOSED") return `<span class="status-badge status-closed">CLOSED</span>`;
+      return `<span class="status-badge status-other">${escapeHtml(s || "UNKNOWN")}</span>`;
+    }
+
+    function renderTicket(ticket) {
+      currentTicket = ticket;
+
+      topTicketId.textContent = `Ticket ID: ${ticket.ticket_id || "-"}`;
+      topSubject.textContent = ticket.subject ? `Subject: ${ticket.subject}` : "";
+
+      metaTicketId.textContent = ticket.ticket_id || "-";
+      metaName.textContent = ticket.name || "-";
+      metaEmail.textContent = ticket.email || "-";
+      metaCategory.textContent = ticket.category || "-";
+      metaPriority.textContent = ticket.priority_level || "-";
+      metaStatus.innerHTML = makeStatusBadge(ticket.status);
+
+      ticketMeta.style.display = "grid";
+      loadingEl.style.display = "none";
+      chatList.style.display = "flex";
+
+      const isClosed = String(ticket.status || "").toUpperCase() === "CLOSED";
+
+      if (isClosed) {
+        closedBox.style.display = "block";
+        replyBox.style.display = "none";
+      } else {
+        closedBox.style.display = "none";
+        replyBox.style.display = "block";
+      }
+
+      const messages = [];
+
+      if (ticket.message) {
+        messages.push({
+          sender: ticket.name || "Customer",
+          type: "customer",
+          text: ticket.message,
+          time: ticket.response_deadline || ""
+        });
+      }
+
+      if (ticket.auto_reply) {
+        messages.push({
+          sender: "Support Team",
+          type: "support",
+          text: ticket.auto_reply,
+          time: ""
+        });
+      }
+
+      chatList.innerHTML = messages.map(msg => `
+        <div class="bubble ${msg.type}">
+          <div class="bubble-header">${escapeHtml(msg.sender)}</div>
+          <div>${escapeHtml(msg.text)}</div>
+          <div class="bubble-time">${escapeHtml(msg.time)}</div>
+        </div>
+      `).join("");
+    }
+
+    async function loadTicket() {
+      loadingEl.style.display = "block";
+      notFoundEl.style.display = "none";
+      chatList.style.display = "none";
+      ticketMeta.style.display = "none";
+      closedBox.style.display = "none";
+      replyBox.style.display = "none";
+      replyNotice.textContent = "";
+
+      if (!ticketId) {
+        loadingEl.style.display = "none";
+        notFoundEl.style.display = "block";
+        topTicketId.textContent = "No ticket id provided.";
+        return;
+      }
+
+      try {
+        const response = await fetch(SHEET_CSV_URL);
+        const csvText = await response.text();
+        const rows = parseCSV(csvText);
+        const objects = rowsToObjects(rows);
+
+        const ticket = objects.find(row => String(row.ticket_id).trim() === String(ticketId).trim());
+
+        if (!ticket) {
+          loadingEl.style.display = "none";
+          notFoundEl.style.display = "block";
+          topTicketId.textContent = `Ticket ID: ${ticketId}`;
+          topSubject.textContent = "";
+          return;
+        }
+
+        renderTicket(ticket);
+      } catch (error) {
+        loadingEl.style.display = "none";
+        notFoundEl.style.display = "block";
+        topTicketId.textContent = "Could not load ticket.";
+      }
+    }
+
+    async function sendReply() {
+      const message = replyMessage.value.trim();
+
+      if (!message) {
+        replyNotice.textContent = "Please write a message first.";
+        return;
+      }
+
+      if (!currentTicket) {
+        replyNotice.textContent = "Ticket data is missing.";
+        return;
+      }
+
+      if (String(currentTicket.status || "").toUpperCase() === "CLOSED") {
+        replyNotice.textContent = "This ticket is closed.";
+        return;
+      }
+
+      if (REPLY_WEBHOOK_URL === "PUT_YOUR_REPLY_WEBHOOK_HERE") {
+        replyNotice.textContent = "Reply webhook is not set yet.";
+        return;
+      }
+
+      sendBtn.disabled = true;
+      replyNotice.textContent = "Sending reply...";
+
+      try {
+        const response = await fetch(REPLY_WEBHOOK_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            ticket_id: currentTicket.ticket_id,
+            name: currentTicket.name,
+            email: currentTicket.email,
+            message: message
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed");
+        }
+
+        replyMessage.value = "";
+        replyNotice.textContent = "Reply sent successfully.";
+      } catch (error) {
+        replyNotice.textContent = "Something went wrong while sending your reply.";
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    sendBtn.addEventListener("click", sendReply);
+    refreshBtn.addEventListener("click", loadTicket);
+
+    loadTicket();
+  </script>
+</body>
+</html>
