@@ -3,62 +3,98 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ticket Chat</title>
+  <title>Support Admin</title>
   <style>
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f1220;
-      color: #f3f4f6;
+      font-family: Inter, Arial, sans-serif;
+      background: #0b1020;
+      color: #eef2ff;
     }
-    .page {
-      max-width: 980px;
-      margin: 28px auto;
-      padding: 0 16px;
+    .wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 20px;
     }
-    .card {
-      background: #171a2b;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 12px 34px rgba(0,0,0,0.24);
+    .hero {
+      background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
+      border-radius: 22px;
+      padding: 24px;
+      margin-bottom: 18px;
+      box-shadow: 0 16px 40px rgba(0,0,0,.25);
     }
-    .topbar {
-      background: linear-gradient(135deg, #4f46e5, #312e81);
-      color: white;
-      padding: 26px;
-    }
-    .topbar h1 {
+    .hero h1 {
       margin: 0 0 8px;
       font-size: 28px;
     }
-    .topbar p {
-      margin: 4px 0;
-      color: #e5e7eb;
+    .hero p {
+      margin: 0;
+      color: #e0e7ff;
+      opacity: .9;
     }
-    .meta {
+    .layout {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 10px;
-      padding: 18px 24px;
-      background: rgba(255,255,255,0.02);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      grid-template-columns: 370px 1fr;
+      gap: 18px;
     }
-    .meta-box {
-      background: #0f1220;
-      border: 1px solid rgba(255,255,255,0.08);
+    .panel {
+      background: #121933;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .panel-head {
+      padding: 18px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+    }
+    .panel-head h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .panel-body {
+      padding: 16px;
+    }
+    .search {
+      width: 100%;
+      padding: 12px 14px;
       border-radius: 14px;
-      padding: 12px;
-    }
-    .meta-box small {
-      display: block;
-      color: #94a3b8;
-      margin-bottom: 6px;
-    }
-    .meta-box strong {
+      border: 1px solid rgba(255,255,255,.1);
+      background: #0b1020;
       color: white;
-      word-break: break-word;
+      outline: none;
+      margin-bottom: 12px;
+    }
+    .ticket-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 72vh;
+      overflow: auto;
+    }
+    .ticket-item {
+      background: #0b1020;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px;
+      padding: 14px;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+    .ticket-item:hover,
+    .ticket-item.active {
+      border-color: #6366f1;
+      background: #141b38;
+    }
+    .ticket-item h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      color: white;
+    }
+    .ticket-item p {
+      margin: 4px 0;
+      color: #cbd5e1;
+      font-size: 13px;
     }
     .badge {
       display: inline-block;
@@ -66,167 +102,191 @@
       border-radius: 999px;
       font-size: 12px;
       font-weight: 700;
+      margin-right: 6px;
     }
-    .open { background: rgba(59,130,246,0.16); color: #93c5fd; }
-    .closed { background: rgba(239,68,68,0.16); color: #fca5a5; }
-    .other { background: rgba(168,85,247,0.16); color: #d8b4fe; }
+    .open { background: rgba(59,130,246,.18); color: #93c5fd; }
+    .closed { background: rgba(239,68,68,.18); color: #fca5a5; }
+    .low { background: rgba(34,197,94,.18); color: #86efac; }
+    .med { background: rgba(245,158,11,.18); color: #fde68a; }
+    .high { background: rgba(168,85,247,.18); color: #d8b4fe; }
 
-    .content {
-      padding: 24px;
+    .empty {
+      color: #94a3b8;
+      text-align: center;
+      padding: 30px 12px;
     }
-    .chat-list {
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .meta-card {
+      background: #0b1020;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px;
+      padding: 14px;
+    }
+    .meta-card small {
+      display: block;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+    .meta-card strong {
+      color: white;
+      word-break: break-word;
+    }
+
+    .chat-box {
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      min-height: 240px;
+      gap: 12px;
+      min-height: 220px;
+      margin-bottom: 18px;
     }
     .bubble {
-      max-width: 75%;
+      max-width: 78%;
       padding: 14px 16px;
       border-radius: 18px;
-      line-height: 1.7;
       white-space: pre-wrap;
       word-break: break-word;
+      line-height: 1.65;
       font-size: 14px;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.16);
+      box-shadow: 0 8px 24px rgba(0,0,0,.18);
     }
     .bubble.customer {
       align-self: flex-start;
-      background: #1f243f;
-      border: 1px solid rgba(255,255,255,0.06);
-      color: #f9fafb;
+      background: #1a2242;
+      color: #f8fafc;
+      border: 1px solid rgba(255,255,255,.05);
     }
     .bubble.support {
       align-self: flex-end;
-      background: linear-gradient(135deg, #4f46e5, #5b21b6);
+      background: linear-gradient(135deg, #4f46e5, #6d28d9);
       color: white;
-      border: 1px solid rgba(255,255,255,0.08);
     }
     .sender {
       font-size: 12px;
       font-weight: 700;
-      opacity: .88;
       margin-bottom: 8px;
+      opacity: .9;
     }
-    .time {
-      margin-top: 8px;
-      font-size: 11px;
-      opacity: .7;
-    }
-    .reply-box {
-      margin-top: 22px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255,255,255,0.08);
-    }
+
     textarea {
       width: 100%;
-      min-height: 130px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: #0f1220;
-      color: white;
+      min-height: 120px;
       padding: 14px;
-      resize: vertical;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: #0b1020;
+      color: white;
       outline: none;
-      font-size: 14px;
+      resize: vertical;
+      font: inherit;
     }
     .actions {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
-      margin-top: 12px;
       align-items: center;
+      margin-top: 12px;
     }
-    button, .file-label {
+    button, select {
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 12px 16px;
-      font-size: 14px;
       font-weight: 700;
       cursor: pointer;
+      font: inherit;
     }
-    button.primary {
-      background: linear-gradient(135deg, #4f46e5, #5b21b6);
+    .primary {
+      background: linear-gradient(135deg, #4f46e5, #6d28d9);
       color: white;
     }
-    button.secondary {
+    .secondary {
       background: #111827;
       color: white;
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,.08);
     }
-    .file-label {
-      background: #111827;
-      color: white;
-      border: 1px dashed rgba(255,255,255,0.2);
-      display: inline-block;
-    }
-    input[type="file"] { display: none; }
     .notice {
       margin-top: 10px;
       color: #cbd5e1;
       font-size: 13px;
     }
-    .closed-box {
-      margin-top: 18px;
-      background: rgba(239,68,68,0.12);
-      color: #fecaca;
-      border: 1px solid rgba(239,68,68,0.25);
-      padding: 14px;
-      border-radius: 12px;
-      font-weight: 700;
-    }
-    .empty {
-      color: #94a3b8;
-      text-align: center;
-      padding: 30px 10px;
-    }
-    @media (max-width: 700px) {
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
       .bubble { max-width: 100%; }
+    }
+    @media (max-width: 640px) {
+      .wrap { padding: 12px; }
+      .hero h1 { font-size: 22px; }
+      .panel-body, .panel-head, .hero { padding: 16px; }
+      .actions { flex-direction: column; align-items: stretch; }
+      button, select { width: 100%; }
     }
   </style>
 </head>
 <body>
-  <div class="page">
-    <div class="card">
-      <div class="topbar">
-        <h1>Support Ticket</h1>
-        <p id="topTicketId">Loading...</p>
-        <p id="topSubject"></p>
-      </div>
+  <div class="wrap">
+    <div class="hero">
+      <h1>Support Admin Dashboard</h1>
+      <p>View all tickets and manage customer conversations.</p>
+    </div>
 
-      <div id="metaWrap" class="meta" style="display:none;">
-        <div class="meta-box"><small>Ticket ID</small><strong id="mTicketId">-</strong></div>
-        <div class="meta-box"><small>Name</small><strong id="mName">-</strong></div>
-        <div class="meta-box"><small>Email</small><strong id="mEmail">-</strong></div>
-        <div class="meta-box"><small>Category</small><strong id="mCategory">-</strong></div>
-        <div class="meta-box"><small>Priority</small><strong id="mPriority">-</strong></div>
-        <div class="meta-box"><small>Status</small><strong id="mStatus">-</strong></div>
-      </div>
-
-      <div class="content">
-        <div id="loading" class="empty">Loading ticket...</div>
-        <div id="notFound" class="empty" style="display:none;">Ticket not found.</div>
-        <div id="chatList" class="chat-list" style="display:none;"></div>
-
-        <div id="closedBox" class="closed-box" style="display:none;">
-          This ticket is closed. You can no longer send new messages.
+    <div class="layout">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>All Tickets</h2>
         </div>
+        <div class="panel-body">
+          <input id="searchInput" class="search" placeholder="Search ticket id, name, email, subject..." />
+          <div id="ticketList" class="ticket-list"></div>
+        </div>
+      </div>
 
-        <div id="replyBox" class="reply-box" style="display:none;">
-          <h3 style="margin:0 0 10px;">Reply to this ticket</h3>
-          <textarea id="replyMessage" placeholder="Write your message here..."></textarea>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Ticket Details</h2>
+        </div>
+        <div class="panel-body">
+          <div id="emptyState" class="empty">Select a ticket from the left.</div>
 
-          <div class="actions">
-            <label class="file-label">
-              Attach files / images
-              <input type="file" id="fileInput" multiple accept="image/*,.pdf,.doc,.docx,.png,.jpg,.jpeg" />
-            </label>
-            <button id="sendBtn" class="primary">Send Reply</button>
-            <button id="refreshBtn" class="secondary">Refresh</button>
+          <div id="details" style="display:none;">
+            <div class="meta-grid">
+              <div class="meta-card"><small>Ticket ID</small><strong id="dTicketId">-</strong></div>
+              <div class="meta-card"><small>Name</small><strong id="dName">-</strong></div>
+              <div class="meta-card"><small>Email</small><strong id="dEmail">-</strong></div>
+              <div class="meta-card"><small>Subject</small><strong id="dSubject">-</strong></div>
+              <div class="meta-card"><small>Category</small><strong id="dCategory">-</strong></div>
+              <div class="meta-card"><small>Status</small><strong id="dStatus">-</strong></div>
+            </div>
+
+            <h3 style="margin:0 0 12px;">Conversation</h3>
+            <div id="chatBox" class="chat-box"></div>
+
+            <div style="margin-top:18px;">
+              <label style="display:block;color:#94a3b8;margin-bottom:8px;">Change status</label>
+              <div class="actions">
+                <select id="statusSelect" class="secondary">
+                  <option value="OPEN">OPEN</option>
+                  <option value="CLOSED">CLOSED</option>
+                </select>
+                <button id="saveStatusBtn" class="secondary">Save Status</button>
+              </div>
+            </div>
+
+            <div style="margin-top:18px;">
+              <label style="display:block;color:#94a3b8;margin-bottom:8px;">Reply</label>
+              <textarea id="replyText" placeholder="Write your reply..."></textarea>
+              <div class="actions">
+                <button id="sendReplyBtn" class="primary">Send Reply</button>
+                <button id="refreshBtn" class="secondary">Refresh</button>
+              </div>
+              <div id="notice" class="notice"></div>
+            </div>
           </div>
-
-          <div id="fileNames" class="notice"></div>
-          <div id="replyNotice" class="notice"></div>
         </div>
       </div>
     </div>
@@ -234,33 +294,23 @@
 
   <script>
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7DzUBQu_foss2Q28P_aEEyWHA7k7-dpKOlJtXS-7Sgm0AXlB6zklULk4CXp77CRX1G8IBqTnQ6avP/pub?output=csv";
-    const REPLY_WEBHOOK_URL = "PUT_REPLY_WEBHOOK_HERE";
 
-    const params = new URLSearchParams(window.location.search);
-    const ticketId = params.get("ticket");
+    const ticketList = document.getElementById("ticketList");
+    const searchInput = document.getElementById("searchInput");
+    const emptyState = document.getElementById("emptyState");
+    const details = document.getElementById("details");
+    const chatBox = document.getElementById("chatBox");
 
-    const topTicketId = document.getElementById("topTicketId");
-    const topSubject = document.getElementById("topSubject");
-    const metaWrap = document.getElementById("metaWrap");
-    const mTicketId = document.getElementById("mTicketId");
-    const mName = document.getElementById("mName");
-    const mEmail = document.getElementById("mEmail");
-    const mCategory = document.getElementById("mCategory");
-    const mPriority = document.getElementById("mPriority");
-    const mStatus = document.getElementById("mStatus");
-    const loading = document.getElementById("loading");
-    const notFound = document.getElementById("notFound");
-    const chatList = document.getElementById("chatList");
-    const closedBox = document.getElementById("closedBox");
-    const replyBox = document.getElementById("replyBox");
-    const replyMessage = document.getElementById("replyMessage");
-    const sendBtn = document.getElementById("sendBtn");
-    const refreshBtn = document.getElementById("refreshBtn");
-    const fileInput = document.getElementById("fileInput");
-    const fileNames = document.getElementById("fileNames");
-    const replyNotice = document.getElementById("replyNotice");
+    const dTicketId = document.getElementById("dTicketId");
+    const dName = document.getElementById("dName");
+    const dEmail = document.getElementById("dEmail");
+    const dSubject = document.getElementById("dSubject");
+    const dCategory = document.getElementById("dCategory");
+    const dStatus = document.getElementById("dStatus");
+    const statusSelect = document.getElementById("statusSelect");
 
-    let currentTicket = null;
+    let tickets = [];
+    let selectedTicket = null;
 
     function parseCSV(text) {
       const rows = [];
@@ -271,6 +321,7 @@
       for (let i = 0; i < text.length; i++) {
         const char = text[i];
         const next = text[i + 1];
+
         if (char === '"') {
           if (inQuotes && next === '"') {
             current += '"';
@@ -291,10 +342,12 @@
           current += char;
         }
       }
+
       if (current.length > 0 || row.length > 0) {
         row.push(current);
         rows.push(row);
       }
+
       return rows.filter(r => r.some(cell => String(cell).trim() !== ""));
     }
 
@@ -302,12 +355,14 @@
       const headers = rows[0].map(h => String(h).trim());
       return rows.slice(1).map(row => {
         const obj = {};
-        headers.forEach((header, index) => obj[header] = String(row[index] || "").trim());
+        headers.forEach((header, index) => {
+          obj[header] = String(row[index] || "").trim();
+        });
         return obj;
       });
     }
 
-    function escapeHtml(str) {
+    function esc(str) {
       return String(str || "")
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -320,155 +375,98 @@
       const s = String(status || "").toUpperCase();
       if (s === "OPEN") return `<span class="badge open">OPEN</span>`;
       if (s === "CLOSED") return `<span class="badge closed">CLOSED</span>`;
-      return `<span class="badge other">${escapeHtml(s)}</span>`;
+      return `<span class="badge open">${esc(s || "UNKNOWN")}</span>`;
     }
 
-    function renderTicket(ticket) {
-      currentTicket = ticket;
-      topTicketId.textContent = `Ticket ID: ${ticket.ticket_id || "-"}`;
-      topSubject.textContent = ticket.subject ? `Subject: ${ticket.subject}` : "";
+    function priorityBadge(priority) {
+      const p = String(priority || "").toLowerCase();
+      if (p === "low") return `<span class="badge low">LOW</span>`;
+      if (p === "medium") return `<span class="badge med">MEDIUM</span>`;
+      if (p === "high") return `<span class="badge high">HIGH</span>`;
+      return `<span class="badge low">${esc(priority || "LOW")}</span>`;
+    }
 
-      mTicketId.textContent = ticket.ticket_id || "-";
-      mName.textContent = ticket.name || "-";
-      mEmail.textContent = ticket.email || "-";
-      mCategory.textContent = ticket.category || "-";
-      mPriority.textContent = ticket.priority_level || "-";
-      mStatus.innerHTML = statusBadge(ticket.status);
+    function renderList() {
+      const q = searchInput.value.trim().toLowerCase();
+      const filtered = tickets.filter(t =>
+        (t.ticket_id || "").toLowerCase().includes(q) ||
+        (t.name || "").toLowerCase().includes(q) ||
+        (t.email || "").toLowerCase().includes(q) ||
+        (t.subject || "").toLowerCase().includes(q)
+      );
 
-      metaWrap.style.display = "grid";
-      loading.style.display = "none";
-      chatList.style.display = "flex";
-
-      const isClosed = String(ticket.status || "").toUpperCase() === "CLOSED";
-      closedBox.style.display = isClosed ? "block" : "none";
-      replyBox.style.display = isClosed ? "none" : "block";
-
-      const messages = [];
-
-      if (ticket.message) {
-        messages.push({
-          type: "customer",
-          sender: ticket.name || "Customer",
-          text: ticket.message
-        });
+      if (!filtered.length) {
+        ticketList.innerHTML = `<div class="empty">No tickets found.</div>`;
+        return;
       }
 
-      if (ticket.auto_reply) {
-        messages.push({
-          type: "support",
-          sender: "Support Team",
-          text: ticket.auto_reply
-        });
-      }
-
-      chatList.innerHTML = messages.map(msg => `
-        <div class="bubble ${msg.type}">
-          <div class="sender">${escapeHtml(msg.sender)}</div>
-          <div>${escapeHtml(msg.text)}</div>
+      ticketList.innerHTML = filtered.map(t => `
+        <div class="ticket-item ${selectedTicket && selectedTicket.ticket_id === t.ticket_id ? "active" : ""}" data-ticket="${esc(t.ticket_id)}">
+          <h3>#${esc(t.ticket_id)} — ${esc(t.subject || "No subject")}</h3>
+          <p><strong>${esc(t.name || "-")}</strong></p>
+          <p>${esc(t.email || "-")}</p>
+          <p>${statusBadge(t.status)} ${priorityBadge(t.priority_level)}</p>
         </div>
       `).join("");
+
+      document.querySelectorAll(".ticket-item").forEach(item => {
+        item.addEventListener("click", () => {
+          const id = item.dataset.ticket;
+          const found = tickets.find(t => String(t.ticket_id) === String(id));
+          if (found) renderDetails(found);
+        });
+      });
     }
 
-    async function loadTicket() {
-      loading.style.display = "block";
-      notFound.style.display = "none";
-      chatList.style.display = "none";
-      metaWrap.style.display = "none";
-      closedBox.style.display = "none";
-      replyBox.style.display = "none";
-      replyNotice.textContent = "";
+    function renderDetails(ticket) {
+      selectedTicket = ticket;
+      emptyState.style.display = "none";
+      details.style.display = "block";
 
-      if (!ticketId) {
-        loading.style.display = "none";
-        notFound.style.display = "block";
-        topTicketId.textContent = "No ticket id provided.";
-        return;
+      dTicketId.textContent = ticket.ticket_id || "-";
+      dName.textContent = ticket.name || "-";
+      dEmail.textContent = ticket.email || "-";
+      dSubject.textContent = ticket.subject || "-";
+      dCategory.textContent = ticket.category || "-";
+      dStatus.innerHTML = statusBadge(ticket.status);
+      statusSelect.value = String(ticket.status || "OPEN").toUpperCase();
+
+      const msgs = [];
+      if (ticket.message) {
+        msgs.push({ sender: ticket.name || "Customer", type: "customer", text: ticket.message });
+      }
+      if (ticket.auto_reply) {
+        msgs.push({ sender: "Support Team", type: "support", text: ticket.auto_reply });
       }
 
+      chatBox.innerHTML = msgs.map(m => `
+        <div class="bubble ${m.type}">
+          <div class="sender">${esc(m.sender)}</div>
+          <div>${esc(m.text)}</div>
+        </div>
+      `).join("");
+
+      renderList();
+    }
+
+    async function loadTickets() {
       try {
-        const res = await fetch(SHEET_CSV_URL);
+        const res = await fetch(SHEET_CSV_URL + "&t=" + Date.now());
         const csv = await res.text();
         const rows = parseCSV(csv);
-        const data = rowsToObjects(rows);
-        const ticket = data.find(t => String(t.ticket_id) === String(ticketId));
-
-        if (!ticket) {
-          loading.style.display = "none";
-          notFound.style.display = "block";
+        if (!rows.length || rows.length < 2) {
+          ticketList.innerHTML = `<div class="empty">No tickets found.</div>`;
           return;
         }
-
-        renderTicket(ticket);
-      } catch {
-        loading.style.display = "none";
-        notFound.style.display = "block";
-        topTicketId.textContent = "Could not load ticket.";
+        tickets = rowsToObjects(rows).filter(t => t.ticket_id);
+        renderList();
+      } catch (e) {
+        ticketList.innerHTML = `<div class="empty">Could not load tickets.</div>`;
       }
     }
 
-    async function sendReply() {
-      const text = replyMessage.value.trim();
-      if (!text) {
-        replyNotice.textContent = "Please write a message first.";
-        return;
-      }
-
-      if (!currentTicket) {
-        replyNotice.textContent = "Ticket not loaded.";
-        return;
-      }
-
-      if (String(currentTicket.status || "").toUpperCase() === "CLOSED") {
-        replyNotice.textContent = "This ticket is closed.";
-        return;
-      }
-
-      if (REPLY_WEBHOOK_URL === "PUT_REPLY_WEBHOOK_HERE") {
-        replyNotice.textContent = "Reply webhook not set yet.";
-        return;
-      }
-
-      const files = Array.from(fileInput.files || []);
-      const attachmentNames = files.map(f => f.name).join(", ");
-
-      sendBtn.disabled = true;
-      replyNotice.textContent = "Sending reply...";
-
-      try {
-        const res = await fetch(REPLY_WEBHOOK_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ticket_id: currentTicket.ticket_id,
-            name: currentTicket.name,
-            email: currentTicket.email,
-            message: text,
-            attachments: attachmentNames
-          })
-        });
-
-        if (!res.ok) throw new Error("Failed");
-
-        replyMessage.value = "";
-        fileInput.value = "";
-        fileNames.textContent = "";
-        replyNotice.textContent = "Reply sent successfully.";
-      } catch {
-        replyNotice.textContent = "Something went wrong while sending your reply.";
-      } finally {
-        sendBtn.disabled = false;
-      }
-    }
-
-    fileInput.addEventListener("change", () => {
-      const files = Array.from(fileInput.files || []);
-      fileNames.textContent = files.length ? `Selected files: ${files.map(f => f.name).join(", ")}` : "";
-    });
-
-    sendBtn.addEventListener("click", sendReply);
-    refreshBtn.addEventListener("click", loadTicket);
-
-    loadTicket();
+    searchInput.addEventListener("input", renderList);
+    loadTickets();
   </script>
 </body>
 </html>
