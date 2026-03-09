@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -109,11 +110,13 @@
     .low { background: rgba(34,197,94,.18); color: #86efac; }
     .med { background: rgba(245,158,11,.18); color: #fde68a; }
     .high { background: rgba(168,85,247,.18); color: #d8b4fe; }
+
     .empty {
       color: #94a3b8;
       text-align: center;
       padding: 30px 12px;
     }
+
     .meta-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -135,29 +138,29 @@
       color: white;
       word-break: break-word;
     }
+
     .chat-box {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       min-height: 220px;
       margin-bottom: 18px;
     }
     .bubble {
-      display: inline-block;
-      width: auto;
-      max-width: 80%;
-      padding: 10px 12px;
-      border-radius: 16px;
-      font-size: 13px;
-      line-height: 1.5;
-      word-break: break-word;
+      max-width: 78%;
+      padding: 14px 16px;
+      border-radius: 18px;
       white-space: pre-wrap;
-      box-shadow: 0 6px 18px rgba(0,0,0,.16);
+      word-break: break-word;
+      line-height: 1.65;
+      font-size: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.18);
     }
     .bubble.customer {
       align-self: flex-start;
       background: #1a2242;
-      color: white;
+      color: #f8fafc;
+      border: 1px solid rgba(255,255,255,.05);
     }
     .bubble.support {
       align-self: flex-end;
@@ -165,24 +168,16 @@
       color: white;
     }
     .sender {
-      font-size: 11px;
-      opacity: .8;
-      margin-bottom: 6px;
+      font-size: 12px;
       font-weight: 700;
+      margin-bottom: 8px;
+      opacity: .9;
     }
-    .bubble-time {
-      font-size: 10px;
-      opacity: .6;
-      margin-top: 6px;
-    }
-    .composer {
-      position: relative;
-      margin-top: 10px;
-    }
+
     textarea {
       width: 100%;
       min-height: 120px;
-      padding: 14px 95px 14px 14px;
+      padding: 14px;
       border-radius: 16px;
       border: 1px solid rgba(255,255,255,.1);
       background: #0b1020;
@@ -190,18 +185,6 @@
       outline: none;
       resize: vertical;
       font: inherit;
-    }
-    .send-inside {
-      position: absolute;
-      right: 6px;
-      bottom: 6px;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #4f46e5, #6d28d9);
-      color: white;
-      padding: 8px 16px;
-      font-weight: 700;
-      cursor: pointer;
     }
     .actions {
       display: flex;
@@ -218,6 +201,10 @@
       cursor: pointer;
       font: inherit;
     }
+    .primary {
+      background: linear-gradient(135deg, #4f46e5, #6d28d9);
+      color: white;
+    }
     .secondary {
       background: #111827;
       color: white;
@@ -228,9 +215,17 @@
       color: #cbd5e1;
       font-size: 13px;
     }
+
     @media (max-width: 980px) {
       .layout { grid-template-columns: 1fr; }
       .bubble { max-width: 100%; }
+    }
+    @media (max-width: 640px) {
+      .wrap { padding: 12px; }
+      .hero h1 { font-size: 22px; }
+      .panel-body, .panel-head, .hero { padding: 16px; }
+      .actions { flex-direction: column; align-items: stretch; }
+      button, select { width: 100%; }
     }
   </style>
 </head>
@@ -279,21 +274,17 @@
                   <option value="OPEN">OPEN</option>
                   <option value="CLOSED">CLOSED</option>
                 </select>
+                <button id="saveStatusBtn" class="secondary">Save Status</button>
               </div>
             </div>
 
             <div style="margin-top:18px;">
               <label style="display:block;color:#94a3b8;margin-bottom:8px;">Reply</label>
-
-              <div class="composer">
-                <textarea id="replyText" placeholder="Write your reply..."></textarea>
-                <button id="sendReplyBtn" class="send-inside">Send</button>
-              </div>
-
+              <textarea id="replyText" placeholder="Write your reply..."></textarea>
               <div class="actions">
+                <button id="sendReplyBtn" class="primary">Send Reply</button>
                 <button id="refreshBtn" class="secondary">Refresh</button>
               </div>
-
               <div id="notice" class="notice"></div>
             </div>
           </div>
@@ -303,8 +294,7 @@
   </div>
 
   <script>
-    const TICKETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7DzUBQu_foss2Q28P_aEEyWHA7k7-dpKOlJtXS-7Sgm0AXlB6zklULk4CXp77CRX1G8IBqTnQ6avP/pub?output=csv";
-    const REPLIES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7DzUBQu_foss2Q28P_aEEyWHA7k7-dpKOlJtXS-7Sgm0AXlB6zklULk4CXp77CRX1G8IBqTnQ6avP/pub?gid=415288267&single=true&output=csv";
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7DzUBQu_foss2Q28P_aEEyWHA7k7-dpKOlJtXS-7Sgm0AXlB6zklULk4CXp77CRX1G8IBqTnQ6avP/pub?output=csv";
     const ADMIN_REPLY_WEBHOOK_URL = "https://cloud.activepieces.com/api/v1/webhooks/OsdvEzv3yCnuL4Oe7wyZJ";
 
     const ticketList = document.getElementById("ticketList");
@@ -447,134 +437,25 @@
       dStatus.innerHTML = statusBadge(ticket.status);
       statusSelect.value = String(ticket.status || "OPEN").toUpperCase();
 
-      loadConversation(ticket.ticket_id);
-      renderList();
-    }
-
-    async function loadConversation(ticketId) {
-      try {
-        const [ticketRes, repliesRes] = await Promise.all([
-          fetch(TICKETS_CSV_URL + "&t=" + Date.now()),
-          fetch(REPLIES_CSV_URL + "&t=" + Date.now())
-        ]);
-
-        const ticketRows = parseCSV(await ticketRes.text());
-        const repliesRows = parseCSV(await repliesRes.text());
-
-        const ticketObjects = rowsToObjects(ticketRows);
-        const replyObjects = rowsToObjects(repliesRows);
-
-        const ticket = ticketObjects.find(t => String(t.ticket_id).trim() === String(ticketId).trim());
-        const relatedReplies = replyObjects.filter(r => String(r.ticket_id).trim() === String(ticketId).trim());
-
-        const msgs = [];
-
-        if (ticket && ticket.message) {
-          msgs.push({
-            sender: ticket.name || "Customer",
-            type: "customer",
-            text: ticket.message,
-            time: ticket.response_deadline || ""
-          });
-        }
-
-        if (ticket && ticket.auto_reply) {
-          msgs.push({
-            sender: "Support Team",
-            type: "support",
-            text: ticket.auto_reply,
-            time: ""
-          });
-        }
-
-        relatedReplies.forEach(r => {
-          msgs.push({
-            sender: r.sender === "support" ? "Support Team" : (ticket?.name || "Customer"),
-            type: r.sender === "support" ? "support" : "customer",
-            text: r.message || "",
-            time: r.time || ""
-          });
-        });
-
-        chatBox.innerHTML = msgs.map(m => `
-          <div class="bubble ${m.type}">
-            <div class="sender">${esc(m.sender)}</div>
-            <div>${esc(m.text)}</div>
-            <div class="bubble-time">${esc(m.time || "")}</div>
-          </div>
-        `).join("");
-      } catch (e) {
-        chatBox.innerHTML = `<div class="empty">Could not load conversation.</div>`;
+      const msgs = [];
+      if (ticket.message) {
+        msgs.push({ sender: ticket.name || "Customer", type: "customer", text: ticket.message });
       }
+      if (ticket.auto_reply) {
+        msgs.push({ sender: "Support Team", type: "support", text: ticket.auto_reply });
+      }
+
+      chatBox.innerHTML = msgs.map(m => `
+        <div class="bubble ${m.type}">
+          <div class="sender">${esc(m.sender)}</div>
+          <div>${esc(m.text)}</div>
+        </div>
+      `).join("");
+
+      renderList();
     }
 
     async function loadTickets() {
       try {
-        const res = await fetch(TICKETS_CSV_URL + "&t=" + Date.now());
+        const res = await fetch(SHEET_CSV_URL + "&t=" + Date.now());
         const csv = await res.text();
-        const rows = parseCSV(csv);
-
-        if (!rows.length || rows.length < 2) {
-          ticketList.innerHTML = `<div class="empty">No tickets found.</div>`;
-          return;
-        }
-
-        tickets = rowsToObjects(rows).filter(t => t.ticket_id);
-        renderList();
-      } catch (e) {
-        ticketList.innerHTML = `<div class="empty">Could not load tickets.</div>`;
-      }
-    }
-
-    async function sendAdminReply() {
-      const message = replyText.value.trim();
-
-      if (!selectedTicket) {
-        notice.textContent = "Select a ticket first.";
-        return;
-      }
-
-      if (!message) {
-        notice.textContent = "Write a reply first.";
-        return;
-      }
-
-      notice.textContent = "Sending reply...";
-
-      try {
-        const response = await fetch(ADMIN_REPLY_WEBHOOK_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            ticket_id: selectedTicket.ticket_id,
-            name: selectedTicket.name,
-            email: selectedTicket.email,
-            subject: selectedTicket.subject,
-            reply: message,
-            sender: "support"
-          })
-        });
-
-        if (!response.ok) throw new Error("Failed");
-
-        replyText.value = "";
-        notice.textContent = "Reply sent successfully.";
-        setTimeout(() => loadConversation(selectedTicket.ticket_id), 800);
-      } catch (error) {
-        notice.textContent = "Failed to send reply.";
-      }
-    }
-
-    searchInput.addEventListener("input", renderList);
-    sendReplyBtn.addEventListener("click", sendAdminReply);
-    refreshBtn.addEventListener("click", () => {
-      loadTickets();
-      if (selectedTicket) loadConversation(selectedTicket.ticket_id);
-    });
-
-    loadTickets();
-  </script>
-</body>
-</html>
