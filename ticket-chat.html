@@ -6,142 +6,222 @@
   <title>Ticket Chat</title>
   <style>
     * { box-sizing: border-box; }
+
+    :root{
+      --bg: #0b1020;
+      --panel: #121933;
+      --panel-2: #0f172a;
+      --border: rgba(255,255,255,.08);
+      --text: #eef2ff;
+      --muted: #a5b4fc;
+      --muted-2: #94a3b8;
+      --primary: #4f46e5;
+      --primary-2: #6d28d9;
+      --customer: #1a2242;
+      --danger-bg: rgba(239,68,68,.12);
+      --danger-border: rgba(239,68,68,.28);
+      --danger-text: #fecaca;
+      --success-bg: rgba(34,197,94,.12);
+      --success-text: #bbf7d0;
+    }
+
     body {
       margin: 0;
       font-family: Inter, Arial, sans-serif;
-      background: #f3f4f6;
-      color: #111827;
+      background:
+        radial-gradient(circle at top left, rgba(79,70,229,.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(109,40,217,.14), transparent 30%),
+        var(--bg);
+      color: var(--text);
     }
+
     .page {
-      max-width: 1000px;
-      margin: 32px auto;
+      max-width: 980px;
+      margin: 28px auto;
       padding: 0 16px;
     }
+
     .card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 18px;
+      background: rgba(18,25,51,.96);
+      border: 1px solid var(--border);
+      border-radius: 24px;
       overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      box-shadow: 0 20px 50px rgba(0,0,0,.30);
+      backdrop-filter: blur(8px);
     }
+
     .topbar {
-      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      background: linear-gradient(135deg, #4f46e5 0%, #4338ca 42%, #6d28d9 100%);
       color: #fff;
-      padding: 24px;
+      padding: 28px;
     }
+
     .topbar h1 {
       margin: 0 0 8px;
-      font-size: 28px;
+      font-size: 30px;
+      line-height: 1.1;
+      letter-spacing: -.02em;
     }
+
     .topbar p {
       margin: 4px 0;
-      opacity: 0.95;
+      color: rgba(255,255,255,.9);
+      font-size: 14px;
     }
+
     .ticket-meta {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
       gap: 12px;
-      padding: 20px 24px;
-      background: #f9fafb;
-      border-bottom: 1px solid #e5e7eb;
+      padding: 18px 24px;
+      background: rgba(255,255,255,.02);
+      border-bottom: 1px solid var(--border);
     }
+
     .meta-box {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 12px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      min-height: 78px;
     }
+
     .meta-label {
-      font-size: 12px;
-      color: #6b7280;
-      margin-bottom: 6px;
+      font-size: 11px;
+      color: var(--muted-2);
+      margin-bottom: 8px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: .08em;
+      font-weight: 700;
     }
+
     .meta-value {
       font-size: 14px;
       font-weight: 700;
+      color: #fff;
       word-break: break-word;
+      line-height: 1.45;
     }
+
     .status-badge {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       padding: 6px 10px;
       border-radius: 999px;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 800;
+      letter-spacing: .02em;
     }
+
     .status-open {
-      background: #dbeafe;
-      color: #1d4ed8;
+      background: rgba(59,130,246,.16);
+      color: #93c5fd;
     }
+
     .status-closed {
-      background: #fee2e2;
-      color: #b91c1c;
+      background: rgba(239,68,68,.16);
+      color: #fca5a5;
     }
+
     .status-other {
-      background: #ede9fe;
-      color: #6d28d9;
+      background: rgba(168,85,247,.16);
+      color: #d8b4fe;
     }
+
     .messages-wrap {
       padding: 24px;
     }
+
     .section-title {
       margin: 0 0 16px;
       font-size: 18px;
+      color: #fff;
+      letter-spacing: -.01em;
     }
+
     .chat-list {
       display: flex;
       flex-direction: column;
       gap: 14px;
     }
+
     .bubble {
-      max-width: 80%;
+      max-width: 78%;
       padding: 14px 16px;
-      border-radius: 16px;
-      line-height: 1.6;
-      border: 1px solid #e5e7eb;
+      border-radius: 18px;
+      line-height: 1.7;
       white-space: pre-wrap;
       word-break: break-word;
+      font-size: 14px;
+      box-shadow: 0 8px 20px rgba(0,0,0,.18);
     }
+
     .bubble.customer {
       align-self: flex-start;
-      background: #f9fafb;
+      background: var(--customer);
+      color: #f8fafc;
+      border: 1px solid rgba(255,255,255,.05);
+      border-bottom-left-radius: 8px;
     }
+
     .bubble.support {
       align-self: flex-end;
-      background: #eef2ff;
-      border-color: #c7d2fe;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: white;
+      border: 1px solid rgba(255,255,255,.08);
+      border-bottom-right-radius: 8px;
     }
+
     .bubble-header {
-      font-size: 13px;
-      font-weight: 700;
+      font-size: 12px;
+      font-weight: 800;
       margin-bottom: 8px;
+      opacity: .9;
+      letter-spacing: .02em;
     }
+
     .bubble-time {
       margin-top: 10px;
-      font-size: 12px;
-      color: #6b7280;
+      font-size: 11px;
+      color: rgba(255,255,255,.68);
     }
+
     .reply-box {
-      margin-top: 24px;
-      border-top: 1px solid #e5e7eb;
-      padding-top: 20px;
+      margin-top: 26px;
+      border-top: 1px solid var(--border);
+      padding-top: 22px;
     }
+
+    .reply-box h3 {
+      color: #fff;
+      font-size: 17px;
+    }
+
     .reply-box textarea {
       width: 100%;
       min-height: 130px;
       resize: vertical;
-      border: 1px solid #d1d5db;
-      border-radius: 12px;
-      padding: 14px;
-      font-size: 15px;
-      font-family: Arial, sans-serif;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      padding: 15px 16px;
+      font-size: 14px;
+      font-family: Inter, Arial, sans-serif;
       outline: none;
+      background: #0b1020;
+      color: white;
+      transition: .2s ease;
     }
+
+    .reply-box textarea::placeholder {
+      color: #94a3b8;
+    }
+
     .reply-box textarea:focus {
-      border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+      border-color: rgba(99,102,241,.85);
+      box-shadow: 0 0 0 4px rgba(99,102,241,.14);
     }
+
     .reply-actions {
       margin-top: 12px;
       display: flex;
@@ -149,50 +229,157 @@
       align-items: center;
       flex-wrap: wrap;
     }
+
     .btn {
-      background: #4f46e5;
-      color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 14px;
       padding: 12px 18px;
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
+      transition: .2s ease;
     }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
     .btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+      transform: none;
     }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: white;
+      box-shadow: 0 10px 20px rgba(79,70,229,.25);
+    }
+
     .btn.secondary {
       background: #111827;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.08);
     }
+
     .notice {
       margin-top: 12px;
-      font-size: 14px;
-      color: #374151;
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.6;
     }
+
     .closed-box {
       margin-top: 20px;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #991b1b;
-      padding: 14px;
-      border-radius: 12px;
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      color: var(--danger-text);
+      padding: 14px 16px;
+      border-radius: 14px;
       font-weight: 700;
+      line-height: 1.6;
     }
-    .loading, .not-found {
+
+    .loading,
+    .not-found {
       text-align: center;
-      padding: 40px 20px;
-      color: #6b7280;
+      padding: 44px 20px;
+      color: #94a3b8;
+      font-size: 14px;
     }
+
     .footer-note {
       padding: 18px 24px 24px;
-      font-size: 13px;
-      color: #6b7280;
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.7;
     }
-    @media (max-width: 700px) {
-      .bubble { max-width: 100%; }
-      .topbar h1 { font-size: 24px; }
+
+    @media (max-width: 1024px) {
+      .page {
+        max-width: 100%;
+        margin: 18px auto;
+        padding: 0 12px;
+      }
+
+      .topbar,
+      .messages-wrap,
+      .ticket-meta,
+      .footer-note {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .topbar h1 {
+        font-size: 24px;
+      }
+
+      .topbar p {
+        font-size: 13px;
+      }
+
+      .ticket-meta {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .bubble {
+        max-width: 100%;
+        font-size: 14px;
+        padding: 14px;
+      }
+
+      .reply-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .page {
+        padding: 0 8px;
+      }
+
+      .card {
+        border-radius: 18px;
+      }
+
+      .topbar {
+        padding: 18px;
+      }
+
+      .topbar h1 {
+        font-size: 20px;
+      }
+
+      .ticket-meta {
+        grid-template-columns: 1fr;
+        padding: 14px;
+      }
+
+      .meta-box {
+        padding: 12px;
+      }
+
+      .messages-wrap {
+        padding: 16px;
+      }
+
+      .reply-box {
+        margin-top: 18px;
+        padding-top: 18px;
+      }
+
+      .reply-box textarea {
+        min-height: 100px;
+        padding: 12px 14px;
+      }
     }
   </style>
 </head>
@@ -248,7 +435,7 @@
           <textarea id="replyMessage" placeholder="Write your message here..."></textarea>
 
           <div class="reply-actions">
-            <button id="sendBtn" class="btn">Send Reply</button>
+            <button id="sendBtn" class="btn primary">Send Reply</button>
             <button id="refreshBtn" class="btn secondary" type="button">Refresh</button>
           </div>
 
@@ -429,7 +616,7 @@
       }
 
       try {
-        const response = await fetch(SHEET_CSV_URL);
+        const response = await fetch(SHEET_CSV_URL + "&t=" + Date.now());
         const csvText = await response.text();
         const rows = parseCSV(csvText);
         const objects = rowsToObjects(rows);
