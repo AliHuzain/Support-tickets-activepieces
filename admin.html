@@ -1,515 +1,374 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Support Admin</title>
-  <style>
-    * { box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Support</title>
 
-    body{
-      margin:0;
-      font-family:Inter,Arial,sans-serif;
-      background:#0b1020;
-      color:#eef2ff;
-    }
+<style>
 
-    .wrap{
-      max-width:1280px;
-      margin:0 auto;
-      padding:20px;
-    }
+*{box-sizing:border-box;}
 
-    .hero{
-      background:linear-gradient(135deg,#4f46e5 0%,#312e81 100%);
-      border-radius:22px;
-      padding:24px;
-      margin-bottom:18px;
-      box-shadow:0 16px 40px rgba(0,0,0,.25);
-    }
+body{
+margin:0;
+font-family:Inter,Arial;
+background:#0b1020;
+color:white;
+}
 
-    .hero h1{
-      margin:0 0 8px;
-      font-size:28px;
-    }
+.page{
+display:flex;
+justify-content:center;
+min-height:100vh;
+}
 
-    .hero p{
-      margin:0;
-      color:#e0e7ff;
-      opacity:.9;
-    }
+.chat-shell{
+width:100%;
+max-width:420px;
+height:100vh;
+display:flex;
+flex-direction:column;
+background:#121933;
+}
 
-    .layout{
-      display:grid;
-      grid-template-columns:370px 1fr;
-      gap:18px;
-    }
+.topbar{
+background:linear-gradient(135deg,#4f46e5,#6d28d9);
+padding:16px;
+}
 
-    .panel{
-      background:#121933;
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:20px;
-      overflow:hidden;
-    }
+.topbar h1{
+margin:0 0 8px;
+font-size:18px;
+}
 
-    .panel-head{
-      padding:18px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      background:rgba(255,255,255,.03);
-    }
+.messages-wrap{
+flex:1;
+overflow:auto;
+padding:14px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
 
-    .panel-head h2{
-      margin:0;
-      font-size:18px;
-    }
+.bubble{
+display:inline-block;
+width:auto;
+max-width:80%;
+padding:10px 12px;
+border-radius:16px;
+font-size:13px;
+line-height:1.5;
+word-break:break-word;
+white-space:pre-wrap;
+}
 
-    .panel-body{
-      padding:16px;
-    }
+.customer{
+align-self:flex-start;
+background:#1a2242;
+}
 
-    .search{
-      width:100%;
-      padding:12px 14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.1);
-      background:#0b1020;
-      color:white;
-      outline:none;
-      margin-bottom:12px;
-    }
+.support{
+align-self:flex-end;
+background:linear-gradient(135deg,#4f46e5,#6d28d9);
+}
 
-    .ticket-list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      max-height:72vh;
-      overflow:auto;
-    }
+.bubble-header{
+font-size:11px;
+opacity:.8;
+margin-bottom:6px;
+}
 
-    .ticket-item{
-      background:#0b1020;
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:16px;
-      padding:14px;
-      cursor:pointer;
-      transition:.2s ease;
-    }
+.bubble-time{
+font-size:10px;
+opacity:.6;
+margin-top:6px;
+}
 
-    .ticket-item:hover,
-    .ticket-item.active{
-      border-color:#6366f1;
-      background:#141b38;
-    }
+.reply-box{
+padding:10px;
+border-top:1px solid rgba(255,255,255,.08);
+background:#0b1020;
+}
 
-    .ticket-item h3{
-      margin:0 0 8px;
-      font-size:15px;
-      color:white;
-    }
+.composer{
+position:relative;
+}
 
-    .ticket-item p{
-      margin:4px 0;
-      color:#cbd5e1;
-      font-size:13px;
-    }
+textarea{
+width:100%;
+border-radius:16px;
+border:1px solid rgba(255,255,255,.1);
+background:#0b1020;
+color:white;
+padding:12px 90px 12px 12px;
+font-size:13px;
+resize:none;
+}
 
-    .badge{
-      display:inline-block;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:700;
-      margin-right:6px;
-    }
+.send-btn{
+position:absolute;
+right:6px;
+bottom:6px;
+border:none;
+border-radius:12px;
+background:linear-gradient(135deg,#4f46e5,#6d28d9);
+color:white;
+padding:8px 16px;
+font-weight:700;
+cursor:pointer;
+}
 
-    .open{ background:rgba(59,130,246,.18); color:#93c5fd; }
-    .closed{ background:rgba(239,68,68,.18); color:#fca5a5; }
-    .low{ background:rgba(34,197,94,.18); color:#86efac; }
-    .med{ background:rgba(245,158,11,.18); color:#fde68a; }
-    .high{ background:rgba(168,85,247,.18); color:#d8b4fe; }
+.actions{
+margin-top:10px;
+display:flex;
+gap:8px;
+}
 
-    .empty{
-      color:#94a3b8;
-      text-align:center;
-      padding:30px 12px;
-    }
+.btn{
+border:none;
+border-radius:12px;
+padding:10px 14px;
+background:#111827;
+color:white;
+font-size:12px;
+cursor:pointer;
+}
 
-    .meta-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-      gap:12px;
-      margin-bottom:18px;
-    }
+.ticket-list{
+max-height:180px;
+overflow:auto;
+border-bottom:1px solid rgba(255,255,255,.08);
+}
 
-    .meta-card{
-      background:#0b1020;
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:16px;
-      padding:14px;
-    }
+.ticket{
+padding:10px;
+border-bottom:1px solid rgba(255,255,255,.05);
+cursor:pointer;
+}
 
-    .meta-card small{
-      display:block;
-      color:#94a3b8;
-      margin-bottom:6px;
-    }
+.ticket:hover{
+background:#1a2242;
+}
 
-    .meta-card strong{
-      color:white;
-      word-break:break-word;
-    }
+.active{
+background:#1a2242;
+}
 
-    .chat-box{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      min-height:220px;
-      margin-bottom:18px;
-    }
+</style>
 
-    .bubble{
-      display:inline-block;
-      width:auto;
-      max-width:80%;
-      padding:10px 12px;
-      border-radius:16px;
-      font-size:13px;
-      line-height:1.5;
-      word-break:break-word;
-      white-space:pre-wrap;
-      box-shadow:0 6px 18px rgba(0,0,0,.16);
-    }
-
-    .bubble.customer{
-      align-self:flex-start;
-      background:#1a2242;
-      color:white;
-    }
-
-    .bubble.support{
-      align-self:flex-end;
-      background:linear-gradient(135deg,#4f46e5,#6d28d9);
-      color:white;
-    }
-
-    .bubble-header{
-      font-size:11px;
-      opacity:.8;
-      margin-bottom:6px;
-      font-weight:700;
-    }
-
-    .bubble-time{
-      font-size:10px;
-      opacity:.6;
-      margin-top:6px;
-    }
-
-    textarea{
-      width:100%;
-      min-height:120px;
-      padding:14px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.1);
-      background:#0b1020;
-      color:white;
-      outline:none;
-      resize:vertical;
-      font:inherit;
-    }
-
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      margin-top:12px;
-    }
-
-    button, select{
-      border:none;
-      border-radius:14px;
-      padding:12px 16px;
-      font-weight:700;
-      cursor:pointer;
-      font:inherit;
-    }
-
-    .primary{
-      background:linear-gradient(135deg,#4f46e5,#6d28d9);
-      color:white;
-    }
-
-    .secondary{
-      background:#111827;
-      color:white;
-      border:1px solid rgba(255,255,255,.08);
-    }
-
-    .notice{
-      margin-top:10px;
-      color:#cbd5e1;
-      font-size:13px;
-    }
-
-    @media (max-width:980px){
-      .layout{ grid-template-columns:1fr; }
-      .bubble{ max-width:100%; }
-    }
-
-    @media (max-width:640px){
-      .wrap{ padding:12px; }
-      .hero h1{ font-size:22px; }
-      .panel-body,.panel-head,.hero{ padding:16px; }
-      .actions{ flex-direction:column; align-items:stretch; }
-      button,select{ width:100%; }
-    }
-  </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="hero">
-      <h1>Support Admin Dashboard</h1>
-      <p>View all tickets and manage customer conversations.</p>
-    </div>
 
-    <div class="layout">
-      <div class="panel">
-        <div class="panel-head">
-          <h2>All Tickets</h2>
-        </div>
-        <div class="panel-body">
-          <input id="searchInput" class="search" placeholder="Search ticket id, name, email, subject..." />
-          <div id="ticketList" class="ticket-list"></div>
-        </div>
-      </div>
+<div class="page">
 
-      <div class="panel">
-        <div class="panel-head">
-          <h2>Ticket Details</h2>
-        </div>
-        <div class="panel-body">
-          <div id="emptyState" class="empty">Select a ticket from the left.</div>
+<div class="chat-shell">
 
-          <div id="details" style="display:none;">
-            <div class="meta-grid">
-              <div class="meta-card"><small>Ticket ID</small><strong id="dTicketId">-</strong></div>
-              <div class="meta-card"><small>Name</small><strong id="dName">-</strong></div>
-              <div class="meta-card"><small>Email</small><strong id="dEmail">-</strong></div>
-              <div class="meta-card"><small>Subject</small><strong id="dSubject">-</strong></div>
-              <div class="meta-card"><small>Category</small><strong id="dCategory">-</strong></div>
-              <div class="meta-card"><small>Status</small><strong id="dStatus">-</strong></div>
-            </div>
+<div class="topbar">
+<h1>Admin Support</h1>
+</div>
 
-            <h3 style="margin:0 0 12px;">Conversation</h3>
-            <div id="chatBox" class="chat-box"></div>
+<div class="ticket-list" id="ticketList"></div>
 
-            <div style="margin-top:18px;">
-              <label style="display:block;color:#94a3b8;margin-bottom:8px;">Change status</label>
-              <div class="actions">
-                <select id="statusSelect" class="secondary">
-                  <option value="OPEN">OPEN</option>
-                  <option value="CLOSED">CLOSED</option>
-                </select>
-                <button id="saveStatusBtn" class="secondary">Save Status</button>
-              </div>
-            </div>
+<div class="messages-wrap" id="chatList"></div>
 
-            <div style="margin-top:18px;">
-              <label style="display:block;color:#94a3b8;margin-bottom:8px;">Reply</label>
-              <textarea id="replyText" placeholder="Write your reply..."></textarea>
-              <div class="actions">
-                <button id="sendReplyBtn" class="primary">Send Reply</button>
-                <button id="refreshBtn" class="secondary">Refresh</button>
-              </div>
-              <div id="notice" class="notice"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="reply-box">
 
-  <script>
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7DzUBQu_foss2Q28P_aEEyWHA7k7-dpKOlJtXS-7Sgm0AXlB6zklULk4CXp77CRX1G8IBqTnQ6avP/pub?output=csv";
+<div class="composer">
+<textarea id="replyMessage" placeholder="Reply to customer..."></textarea>
+<button class="send-btn" id="sendBtn">Send</button>
+</div>
 
-    const ticketList = document.getElementById("ticketList");
-    const searchInput = document.getElementById("searchInput");
-    const emptyState = document.getElementById("emptyState");
-    const details = document.getElementById("details");
-    const chatBox = document.getElementById("chatBox");
+<div class="actions">
+<button class="btn" id="refreshBtn">Refresh</button>
+</div>
 
-    const dTicketId = document.getElementById("dTicketId");
-    const dName = document.getElementById("dName");
-    const dEmail = document.getElementById("dEmail");
-    const dSubject = document.getElementById("dSubject");
-    const dCategory = document.getElementById("dCategory");
-    const dStatus = document.getElementById("dStatus");
-    const statusSelect = document.getElementById("statusSelect");
+</div>
 
-    let tickets = [];
-    let selectedTicket = null;
+</div>
+</div>
 
-    function parseCSV(text) {
-      const rows = [];
-      let row = [];
-      let current = "";
-      let inQuotes = false;
+<script>
 
-      for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        const next = text[i + 1];
+const SHEET_CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7DzUBQu_foss2Q28P_aEEyWHA7k7-dpKOlJtXS-7Sgm0AXlB6zklULk4CXp77CRX1G8IBqTnQ6avP/pub?output=csv"
 
-        if (char === '"') {
-          if (inQuotes && next === '"') {
-            current += '"';
-            i++;
-          } else {
-            inQuotes = !inQuotes;
-          }
-        } else if (char === ',' && !inQuotes) {
-          row.push(current);
-          current = "";
-        } else if ((char === '\n' || char === '\r') && !inQuotes) {
-          if (char === '\r' && next === '\n') i++;
-          row.push(current);
-          rows.push(row);
-          row = [];
-          current = "";
-        } else {
-          current += char;
-        }
-      }
+const REPLY_WEBHOOK_URL="PUT_YOUR_REPLY_WEBHOOK_HERE"
 
-      if (current.length > 0 || row.length > 0) {
-        row.push(current);
-        rows.push(row);
-      }
+const ticketList=document.getElementById("ticketList")
+const chatList=document.getElementById("chatList")
+const sendBtn=document.getElementById("sendBtn")
+const replyMessage=document.getElementById("replyMessage")
+const refreshBtn=document.getElementById("refreshBtn")
 
-      return rows.filter(r => r.some(cell => String(cell).trim() !== ""));
-    }
+let tickets=[]
+let currentTicket=null
 
-    function rowsToObjects(rows) {
-      const headers = rows[0].map(h => String(h).trim());
-      return rows.slice(1).map(row => {
-        const obj = {};
-        headers.forEach((header, index) => {
-          obj[header] = String(row[index] || "").trim();
-        });
-        return obj;
-      });
-    }
+function parseCSV(text){
 
-    function esc(str) {
-      return String(str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
+const rows=[]
+let row=[]
+let current=""
+let inQuotes=false
 
-    function statusBadge(status) {
-      const s = String(status || "").toUpperCase();
-      if (s === "OPEN") return `<span class="badge open">OPEN</span>`;
-      if (s === "CLOSED") return `<span class="badge closed">CLOSED</span>`;
-      return `<span class="badge open">${esc(s || "UNKNOWN")}</span>`;
-    }
+for(let i=0;i<text.length;i++){
 
-    function priorityBadge(priority) {
-      const p = String(priority || "").toLowerCase();
-      if (p === "low") return `<span class="badge low">LOW</span>`;
-      if (p === "medium") return `<span class="badge med">MEDIUM</span>`;
-      if (p === "high") return `<span class="badge high">HIGH</span>`;
-      return `<span class="badge low">${esc(priority || "LOW")}</span>`;
-    }
+const char=text[i]
+const next=text[i+1]
 
-    function renderList() {
-      const q = searchInput.value.trim().toLowerCase();
-      const filtered = tickets.filter(t =>
-        (t.ticket_id || "").toLowerCase().includes(q) ||
-        (t.name || "").toLowerCase().includes(q) ||
-        (t.email || "").toLowerCase().includes(q) ||
-        (t.subject || "").toLowerCase().includes(q)
-      );
+if(char=='"'){
 
-      if (!filtered.length) {
-        ticketList.innerHTML = `<div class="empty">No tickets found.</div>`;
-        return;
-      }
+if(inQuotes && next=='"'){
+current+='"'
+i++
+}else{
+inQuotes=!inQuotes
+}
 
-      ticketList.innerHTML = filtered.map(t => `
-        <div class="ticket-item ${selectedTicket && selectedTicket.ticket_id === t.ticket_id ? "active" : ""}" data-ticket="${esc(t.ticket_id)}">
-          <h3>#${esc(t.ticket_id)} — ${esc(t.subject || "No subject")}</h3>
-          <p><strong>${esc(t.name || "-")}</strong></p>
-          <p>${esc(t.email || "-")}</p>
-          <p>${statusBadge(t.status)} ${priorityBadge(t.priority_level)}</p>
-        </div>
-      `).join("");
+}else if(char=="," && !inQuotes){
 
-      document.querySelectorAll(".ticket-item").forEach(item => {
-        item.addEventListener("click", () => {
-          const id = item.dataset.ticket;
-          const found = tickets.find(t => String(t.ticket_id) === String(id));
-          if (found) renderDetails(found);
-        });
-      });
-    }
+row.push(current)
+current=""
 
-    function renderDetails(ticket) {
-      selectedTicket = ticket;
-      emptyState.style.display = "none";
-      details.style.display = "block";
+}else if((char=="\n"||char=="\r")&&!inQuotes){
 
-      dTicketId.textContent = ticket.ticket_id || "-";
-      dName.textContent = ticket.name || "-";
-      dEmail.textContent = ticket.email || "-";
-      dSubject.textContent = ticket.subject || "-";
-      dCategory.textContent = ticket.category || "-";
-      dStatus.innerHTML = statusBadge(ticket.status);
-      statusSelect.value = String(ticket.status || "OPEN").toUpperCase();
+row.push(current)
+rows.push(row)
+row=[]
+current=""
 
-      const msgs = [];
+}else{
 
-      if (ticket.message) {
-        msgs.push({ sender: ticket.name || "Customer", type: "customer", text: ticket.message, time: ticket.response_deadline || "" });
-      }
+current+=char
 
-      if (ticket.auto_reply) {
-        msgs.push({ sender: "Support Team", type: "support", text: ticket.auto_reply, time: "" });
-      }
+}
 
-      chatBox.innerHTML = msgs.map(m => `
-        <div class="bubble ${m.type}">
-          <div class="bubble-header">${esc(m.sender)}</div>
-          <div>${esc(m.text)}</div>
-          <div class="bubble-time">${esc(m.time || "")}</div>
-        </div>
-      `).join("");
+}
 
-      renderList();
-    }
+row.push(current)
+rows.push(row)
 
-    async function loadTickets() {
-      try {
-        const res = await fetch(SHEET_CSV_URL + "&t=" + Date.now());
-        const csv = await res.text();
-        const rows = parseCSV(csv);
+return rows
 
-        if (!rows.length || rows.length < 2) {
-          ticketList.innerHTML = `<div class="empty">No tickets found.</div>`;
-          return;
-        }
+}
 
-        tickets = rowsToObjects(rows).filter(t => t.ticket_id);
-        renderList();
-      } catch (e) {
-        ticketList.innerHTML = `<div class="empty">Could not load tickets.</div>`;
-      }
-    }
+function rowsToObjects(rows){
 
-    searchInput.addEventListener("input", renderList);
-    loadTickets();
-  </script>
+const headers=rows[0]
+
+return rows.slice(1).map(row=>{
+
+const obj={}
+
+headers.forEach((h,i)=>{
+obj[h]=row[i]
+})
+
+return obj
+
+})
+
+}
+
+function renderTickets(){
+
+ticketList.innerHTML=tickets.map(t=>`
+
+<div class="ticket ${currentTicket && currentTicket.ticket_id==t.ticket_id?"active":""}" data-id="${t.ticket_id}">
+#${t.ticket_id} — ${t.name}
+</div>
+
+`).join("")
+
+document.querySelectorAll(".ticket").forEach(el=>{
+
+el.onclick=()=>{
+currentTicket=tickets.find(t=>t.ticket_id==el.dataset.id)
+renderChat()
+renderTickets()
+}
+
+})
+
+}
+
+function renderChat(){
+
+if(!currentTicket){
+chatList.innerHTML=""
+return
+}
+
+const messages=[]
+
+if(currentTicket.message){
+messages.push({
+sender:currentTicket.name,
+type:"customer",
+text:currentTicket.message,
+time:currentTicket.response_deadline
+})
+}
+
+if(currentTicket.auto_reply){
+messages.push({
+sender:"Support",
+type:"support",
+text:currentTicket.auto_reply,
+time:""
+})
+}
+
+chatList.innerHTML=messages.map(m=>`
+
+<div class="bubble ${m.type}">
+<div class="bubble-header">${m.sender}</div>
+<div>${m.text}</div>
+<div class="bubble-time">${m.time||""}</div>
+</div>
+
+`).join("")
+
+chatList.scrollTop=chatList.scrollHeight
+
+}
+
+async function loadTickets(){
+
+const res=await fetch(SHEET_CSV_URL+"&t="+Date.now())
+const text=await res.text()
+
+const rows=parseCSV(text)
+tickets=rowsToObjects(rows)
+
+renderTickets()
+
+}
+
+async function sendReply(){
+
+const message=replyMessage.value.trim()
+
+if(!message||!currentTicket)return
+
+await fetch(REPLY_WEBHOOK_URL,{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+ticket_id:currentTicket.ticket_id,
+message:message
+})
+})
+
+replyMessage.value=""
+
+}
+
+sendBtn.onclick=sendReply
+refreshBtn.onclick=loadTickets
+
+loadTickets()
+
+</script>
+
 </body>
 </html>
